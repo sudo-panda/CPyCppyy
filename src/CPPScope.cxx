@@ -457,19 +457,22 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
                 }
                 templated_functions_checked = true;
             }
+        }
 
+#ifdef PRINT_DEBUG
+        printf(" MGA: 5.2\n");
+#endif
         // tickle lazy lookup of data members
-            if (!attr) {
+        if (!attr) {
 #ifdef PRINT_DEBUG
-                printf("   MGA: 5.1.1.2\n");
+            printf("  MGA: 5.2.1\n");
 #endif
-                Cppyy::TCppScope_t var = Cppyy::GetNamed(name, scope);
-                if (Cppyy::IsVariable(var)) {
+            Cppyy::TCppScope_t var = Cppyy::GetNamed(name, scope);
+            if (Cppyy::IsVariable(var)) {
 #ifdef PRINT_DEBUG
-                    printf("    MGA: 5.1.1.2.1\n");
+                printf("   MGA: 5.2.1.1\n");
 #endif
-                    attr = (PyObject*)CPPDataMember_New(scope, var);
-                }
+                attr = (PyObject*)CPPDataMember_New(scope, var);
             }
         }
 
@@ -494,7 +497,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
         // }
 
 #ifdef PRINT_DEBUG
-        printf(" MGA: 5.3\n");
+        printf(" MGA: 5.3, attr = %p\n", attr);
 #endif
     // function templates that have not been instantiated (namespaces _may_ have already
     // been taken care of, by their general function lookup above)
@@ -557,14 +560,30 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
 #endif
                     // printf(" attr => %p\n", attr);
                     // auto attr2 = attr;
-                int i = PyType_Type.tp_setattro((PyObject*)Py_TYPE(pyclass), pyname, attr);
+                int i;
+                if (Cppyy::IsClass(scope)) {
+                    i = PyType_Type.tp_setattro(pyclass, pyname, attr);
+#ifdef PRINT_DEBUG
+                    printf(" SETTING PYCLASS ATTRO: %d\n", i);
+#endif
+                }
+
+                i = PyType_Type.tp_setattro((PyObject*)Py_TYPE(pyclass), pyname, attr);
+#ifdef PRINT_DEBUG
+                printf(" SETTING PY_TYPE ATTRO: %d\n", i);
+#endif
+
                 // PyObject_Print((PyObject*)pyclass, stderr, Py_PRINT_RAW);
                 // printf("%d\n", i);
                 // if (PyErr_Occurred()) printf("ERRRRR\n\n");
-                Py_DECREF(attr);
-                attr = PyType_Type.tp_getattro(pyclass, pyname);
-                    // printf("       2. attr => %p -> %p\n", attr2, attr);
 
+                Py_DECREF(attr);
+                // The call below goes through "dm_get"
+                attr = PyType_Type.tp_getattro(pyclass, pyname);
+
+#ifdef PRINT_DEBUG
+                printf("    MGA: 5.5.1.2, attr = %p\n", attr);
+#endif
                 if (!attr && PyErr_Occurred()) {
 #ifdef PRINT_DEBUG
                     printf("    MGA: 5.5.1.1.1\n");
