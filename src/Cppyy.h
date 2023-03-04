@@ -154,6 +154,8 @@ namespace Cppyy {
     CPPYY_IMPORT
     bool IsNamespace(TCppScope_t scope);
     CPPYY_IMPORT
+    bool IsClass(TCppScope_t scope);
+    CPPYY_IMPORT
     bool IsTemplate(TCppScope_t handle);
     CPPYY_IMPORT
     bool IsTemplateInstantiation(TCppScope_t handle);
