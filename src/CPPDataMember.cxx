@@ -48,6 +48,9 @@ static PyObject* dm_get(CPPDataMember* dm, CPPInstance* pyobj, PyObject* /* kls 
         }
     }
 
+#ifdef PRINT_DEBUG
+    printf("dm_get: 2\n");
+#endif
 // non-initialized or public data accesses through class (e.g. by help())
     void* address = dm->GetAddress(pyobj);
     if (!address || (intptr_t)address == -1 /* Cling error */)
