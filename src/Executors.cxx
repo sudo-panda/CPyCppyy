@@ -49,7 +49,7 @@ namespace {
 #ifdef WITH_THREAD
 #ifdef PRINT_DEBUG
     #define _IMPL_GILCALL_PRINT_TCODE(tcode)                                  \
-        printf("CPPYY_IMPL_GILCALL: %s\n", #tcode)
+        printf("CPPYY_IMPL_GILCALL: %s\n", #tcode);
     #define _IMPL_GILCALL_PRINT_NRG                                           \
         printf("CPPYY_IMPL_GILCALL: Not ReleaseGIL \n");
     #define _IMPL_GILCALL_PRINT_RG                                            \
