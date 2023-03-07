@@ -98,7 +98,7 @@ static void build_constructors(
             size_t offset = (i != 0 ? arg_tots[i-1] : 0);
             for (size_t j = 0; j < nArgs; ++j) {
                 if (i != 0 || j != 0) code << ", ";
-                code << Cppyy::GetMethodArgType(cinfo.first, j) << " a" << (j+offset);
+                code << Cppyy::GetMethodArgTypeAsString(cinfo.first, j) << " a" << (j+offset);
             }
         }
         code << ") : ";
