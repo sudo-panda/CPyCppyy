@@ -347,8 +347,6 @@ void CPyCppyy::CPPDataMember::Set(Cppyy::TCppScope_t scope, Cppyy::TCppScope_t d
     printf("%s ============= %ld\n", Cppyy::GetScopedFinalName(data).c_str(), fOffset);
 #endif
 
-    // std::vector<dim_t> dims;
-    int ndim = 0; Py_ssize_t size = 0;
     // while (0 < (size = Cppyy::GetDimensionSize(scope, idata, ndim))) {
     //      ndim += 1;
     //      if (size == INT_MAX)      // meaning: incomplete array type
@@ -356,11 +354,14 @@ void CPyCppyy::CPPDataMember::Set(Cppyy::TCppScope_t scope, Cppyy::TCppScope_t d
     //      if (ndim == 1) dims.reserve(4);
     //      dims.push_back((dim_t)size);
     // }
-    // if (!dims.empty())
-    //     fFlags |= kIsArrayType;
 
     const std::string name = Cppyy::GetFinalName(data);
     Cppyy::TCppType_t type = Cppyy::GetDatamemberType(data);
+
+    std::vector<dim_t> dims = Cppyy::GetDimensions(type);
+    if (!dims.empty())
+        fFlags |= kIsArrayType;
+
     // fFullType = Cppyy::GetDatamemberType(scope, idata);
     // if (Cppyy::IsEnumData(scope, idata)) {
     //     if (fFullType.find("(anonymous)") == std::string::npos) {
@@ -387,13 +388,13 @@ void CPyCppyy::CPPDataMember::Set(Cppyy::TCppScope_t scope, Cppyy::TCppScope_t d
     //     }
     // }
 
-    // if (dims.empty())
 #ifdef PRINT_DEBUG
     printf("                  DM:S : %s\n", Cppyy::GetTypeAsString(type).c_str());
 #endif
-    fConverter = CreateConverter(type, 0);
-    // else
-    //     fConverter = CreateConverter(fFullType, {(dim_t)dims.size(), dims.data()});
+    if (dims.empty())
+        fConverter = CreateConverter(type, 0);
+    else
+        fConverter = CreateConverter(type, {(dim_t)dims.size(), dims.data()});
 
     fDescription = CPyCppyy_PyText_FromString(name.c_str());
 }

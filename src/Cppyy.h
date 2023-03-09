@@ -315,7 +315,7 @@ namespace Cppyy {
     CPPYY_IMPORT
     bool IsEnumData(TCppScope_t scope, TCppIndex_t idata);
     CPPYY_IMPORT
-    int  GetDimensionSize(TCppScope_t scope, TCppIndex_t idata, int dimension);
+    std::vector<long int> GetDimensions(TCppType_t type);
 
 // enum properties -----------------------------------------------------------
     // CPPYY_IMPORT
