@@ -391,7 +391,7 @@ void CPyCppyy::CPPDataMember::Set(Cppyy::TCppScope_t scope, Cppyy::TCppScope_t d
 #ifdef PRINT_DEBUG
     printf("                  DM:S : %s\n", Cppyy::GetTypeAsString(type).c_str());
 #endif
-    fConverter = CreateConverter(type, 0, Cppyy::GetTypeScope(data));
+    fConverter = CreateConverter(type, 0);
     // else
     //     fConverter = CreateConverter(fFullType, {(dim_t)dims.size(), dims.data()});
 
