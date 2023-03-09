@@ -3025,7 +3025,7 @@ static inline CPyCppyy::Converter* selectInstanceCnv(Cppyy::TCppScope_t klass,
 
 //- factories ----------------------------------------------------------------
 CPYCPPYY_EXPORT
-CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdims_t dims, Cppyy::TCppScope_t klass)
+CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdims_t dims)
 {
 // The matching of the fulltype to a converter factory goes through up to five levels:
 //   1) full, exact match
@@ -3166,7 +3166,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdim
     // printf(" CC: heree4\n");
 // converters for known C++ classes and default (void*)
     Converter* result = nullptr;
-    if (klass || (klass = Cppyy::GetFullScope(realType))) {
+    if (Cppyy::TCppScope_t klass = Cppyy::GetFullScope(realType)) {
         // printf("  CC: he4.1\n");
         Cppyy::TCppType_t raw{0};
         if (Cppyy::GetSmartPtrInfo(realType, &raw, nullptr)) {
@@ -3250,7 +3250,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdim
 }
 
 CPYCPPYY_EXPORT
-CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t dims, Cppyy::TCppScope_t klass)
+CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t dims)
 {
 // The matching of the fulltype to a converter factory goes through up to five levels:
 //   1) full, exact match
@@ -3419,6 +3419,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 #endif
 // converters for known C++ classes and default (void*)
     Converter* result = nullptr;
+    Cppyy::TCppScope_t klass = Cppyy::GetScopeFromType(type);
     if (klass || (klass = Cppyy::GetFullScope(realType))) {
         // printf("  CC2: he4.1\n");
         Cppyy::TCppType_t raw{0};
