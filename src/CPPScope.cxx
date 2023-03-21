@@ -220,7 +220,7 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
 
     if (raw && deref) {
         result->fFlags |= CPPScope::kIsSmart;
-        ((CPPSmartClass*)result)->fUnderlyingType = raw;
+        ((CPPSmartClass*)result)->fUnderlyingScope = raw;
         ((CPPSmartClass*)result)->fDereferencer   = deref;
     }
 

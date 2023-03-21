@@ -795,7 +795,7 @@ PyObject* CPyCppyy::BindCppObjectNoCast(Cppyy::TCppObject_t address,
 // if smart, instantiate a Python-side object of the underlying type, carrying the smartptr
     PyObject* smart_type = (flags != CPPInstance::kNoWrapConv && (((CPPClass*)pyclass)->fFlags & CPPScope::kIsSmart)) ? pyclass : nullptr;
     if (smart_type) {
-        pyclass = CreateScopeProxy(((CPPSmartClass*)smart_type)->fUnderlyingType);
+        pyclass = CreateScopeProxy(((CPPSmartClass*)smart_type)->fUnderlyingScope);
         if (!pyclass) {
         // simply restore and expose as the actual smart pointer class
             pyclass = smart_type;

@@ -2748,7 +2748,7 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
     }
 
 // for the case where we have an ordinary object to convert
-    if (!pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fUnderlyingType)) {
+    if (!pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fUnderlyingScope)) {
     // create the relevant smart pointer and make the pyobject "smart"
         CPPInstance* pysmart = (CPPInstance*)ConvertImplicit(fSmartPtrScope, pyobject, para, ctxt, false);
         if (!CPPInstance_Check(pysmart)) {
@@ -2767,7 +2767,7 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
     }
 
 // final option, try mapping pointer types held (TODO: do not allow for non-const ref)
-    if (pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fUnderlyingType)) {
+    if (pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fUnderlyingScope)) {
         para.fValue.fVoidp = ((CPPInstance*)pyobject)->GetSmartObject();
         para.fTypeCode = 'V';
         return true;

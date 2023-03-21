@@ -149,7 +149,7 @@ PyObject* CPyCppyy::CPPConstructor::Call(CPPInstance*& self,
     // handling smart types this way is deeply fugly, but if CPPInstance sets the proper
     // types in op_new first, then the wrong init is called
         if (((CPPClass*)Py_TYPE(self))->fFlags & CPPScope::kIsSmart) {
-            PyObject* pyclass = CreateScopeProxy(((CPPSmartClass*)Py_TYPE(self))->fUnderlyingType);
+            PyObject* pyclass = CreateScopeProxy(((CPPSmartClass*)Py_TYPE(self))->fUnderlyingScope);
             if (pyclass) {
                 self->SetSmart((PyObject*)Py_TYPE(self));
                 Py_DECREF((PyObject*)Py_TYPE(self));
