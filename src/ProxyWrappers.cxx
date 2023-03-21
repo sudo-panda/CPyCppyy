@@ -488,10 +488,6 @@ static PyObject* BuildCppClassBases(Cppyy::TCppScope_t klass)
             Py_DECREF(pybases);
             pybases = newpybases;
         }
-        // XXX: Check later if still required
-        if (PyErr_Occurred()) {
-            PyErr_Clear();
-        }
     }
 
     return pybases;
