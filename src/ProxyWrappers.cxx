@@ -554,29 +554,6 @@ PyObject* CPyCppyy::CreateScopeProxy(const std::string& name, PyObject* parent, 
     Cppyy::TCppScope_t klass = Cppyy::GetScope(name, parent_scope);
 
     if (!(bool)klass) {
-    // // could be an enum, which are treated seperately in CPPScope (TODO: maybe they
-    // // should be handled here instead anyway??)
-    //     if (Cppyy::IsEnum(lookup))
-    //         return nullptr;
-
-    //XXX: Is this required?
-        // final possibility is a typedef of a builtin; these are mapped on the python side
-        // std::string resolved = Cppyy::ResolveName(lookup);
-        // if (gPyTypeMap) {
-        //     PyObject* tc = PyDict_GetItemString(gPyTypeMap, resolved.c_str()); // borrowed
-        //     if (tc && PyCallable_Check(tc)) {
-        //         PyObject* nt = PyObject_CallFunction(tc, (char*)"ss", name.c_str(), scName.c_str());
-        //         if (nt) {
-        //             if (parent) {
-        //                 AddScopeToParent(parent, name, nt);
-        //                 Py_DECREF(parent);
-        //             }
-        //             return nt;
-        //         }
-        //         PyErr_Clear();
-        //     }
-        // }
-
         if (name == "") {
             klass = Cppyy::GetGlobalScope();
             Py_INCREF(gThisModule);
@@ -588,68 +565,6 @@ PyObject* CPyCppyy::CreateScopeProxy(const std::string& name, PyObject* parent, 
             return nullptr;
         }
     }
-
-// now have a class ... get the actual, fully scoped class name, so that typedef'ed
-// classes are created in the right place
-    // const std::string& actual = Cppyy::GetScopedFinalName(klass);
-    // if (actual != lookup) {
-    //     pyscope = CreateScopeProxy(actual);
-    //     if (!pyscope) PyErr_Clear();
-    // }
-
-// locate the parent, if necessary, for memoizing the class if not specified
-    // std::string::size_type last = 0;
-    // if (!parent) {
-    // // TODO: move this to TypeManip, which already has something similar in
-    // // the form of 'extract_namespace'
-    // // need to deal with template parameters that can have scopes themselves
-    //     int tpl_open = 0;
-    //     for (std::string::size_type pos = 0; pos < name.size(); ++pos) {
-    //         std::string::value_type c = name[pos];
-    //
-    //     // count '<' and '>' to be able to skip template contents
-    //         if (c == '<')
-    //             ++tpl_open;
-    //         else if (c == '>')
-    //             --tpl_open;
-    //
-    //   // by only checking for "::" the last part (class name) is dropped
-    //         else if (tpl_open == 0 && \
-    //             c == ':' && pos+1 < name.size() && name[ pos+1 ] == ':') {
-    //         // found a new scope part
-    //             const std::string& part = name.substr(last, pos-last);
-    //
-    //             PyObject* next = PyObject_GetAttrString(
-    //                 parent ? parent : gThisModule, const_cast<char*>(part.c_str()));
-    //
-    //             if (!next) {            // lookup failed, try to create it
-    //                 PyErr_Clear();
-    //                 next = CreateScopeProxy(part, parent);
-    //             }
-    //             Py_XDECREF(parent);
-    //
-    //             if (!next)              // create failed, give up
-    //                 return nullptr;
-    //
-    //         // found scope part
-    //             parent = next;
-    //
-    //         // done with part (note that pos is moved one ahead here)
-    //             last = pos+2; ++pos;
-    //         }
-    //     }
-    //
-    //     if (parent && !CPPScope_Check(parent)) {
-    //     // Special case: parent found is not one of ours (it's e.g. a pure Python module), so
-    //     // continuing would fail badly. One final lookup, then out of here ...
-    //         std::string unscoped = name.substr(last, std::string::npos);
-    //         PyObject* ret = PyObject_GetAttrString(parent, unscoped.c_str());
-    //         Py_DECREF(parent);
-    //         return ret;
-    //     }
-    // }
-
-// use the module as a fake scope if no outer scope found
 
     return CreateScopeProxy(klass, parent, flags);
 }

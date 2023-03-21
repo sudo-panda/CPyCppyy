@@ -280,8 +280,6 @@ namespace Cppyy {
     bool IsStaticMethod(TCppMethod_t method);
 
 // data member reflection information ----------------------------------------
-    // CPPYY_IMPORT
-    // TCppIndex_t GetNumDatamembers(TCppScope_t scope, bool accept_namespace = false);
     CPPYY_IMPORT
     std::vector<TCppScope_t> GetDatamembers(TCppScope_t scope);
     CPPYY_IMPORT
@@ -324,11 +322,8 @@ namespace Cppyy {
     TCppScope_t GetEnumScope(TCppScope_t);
     CPPYY_IMPORT
     std::vector<TCppScope_t> GetEnumConstants(TCppScope_t scope);
-    // CPPYY_IMPORT
-    // std::string GetEnumDataName(TCppEnum_t, TCppIndex_t idata);
     CPPYY_IMPORT
     long long   GetEnumDataValue(TCppScope_t scope);
-
     CPPYY_IMPORT
     TCppScope_t InstantiateTemplateClass(
         TCppScope_t tmpl, TCppType_t* types, size_t types_size);
