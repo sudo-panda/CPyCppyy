@@ -626,7 +626,7 @@ PyObject* VectorGetItem(CPPInstance* self, PySliceObject* index)
 }
 
 
-static Cppyy::TCppType_t sVectorBoolTypeID = (Cppyy::TCppType_t)0;
+static Cppyy::TCppScope_t sVectorBoolTypeID = (Cppyy::TCppScope_t)0;
 
 PyObject* VectorBoolGetItem(CPPInstance* self, PyObject* idx)
 {
@@ -1685,7 +1685,7 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
 
     if (Cppyy::IsAggregate(((CPPClass*)pyclass)->fCppType) && name.compare(0, 5, "std::", 5) != 0) {
     // create a pseudo-constructor to allow initializer-style object creation
-        Cppyy::TCppType_t kls = ((CPPClass*)pyclass)->fCppType;
+        Cppyy::TCppScope_t kls = ((CPPClass*)pyclass)->fCppType;
         std::vector<Cppyy::TCppScope_t> datamems = Cppyy::GetDatamembers(kls);
         if (!datamems.empty()) {
             std::string rname = name;

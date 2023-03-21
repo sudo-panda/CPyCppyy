@@ -18,7 +18,7 @@ public:
     MemoryRegulator();
 
 // callback from C++-side frameworks
-    static bool RecursiveRemove(Cppyy::TCppObject_t cppobj, Cppyy::TCppType_t klass);
+    static bool RecursiveRemove(Cppyy::TCppObject_t cppobj, Cppyy::TCppScope_t klass);
 
 // called when a new python proxy object is created
     static bool RegisterPyObject(CPPInstance* pyobj, void* cppobj);

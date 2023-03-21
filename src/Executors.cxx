@@ -547,7 +547,7 @@ PyObject* CPyCppyy::STLStringExecutor::Execute(
 // execute <method> with argument <self, ctxt>, construct python string return value
 
 // TODO: make use of GILLCallS (?!)
-    static Cppyy::TCppType_t sSTLStringScope = Cppyy::GetFullScope("std::string");
+    static Cppyy::TCppScope_t sSTLStringScope = Cppyy::GetFullScope("std::string");
     std::string* result = (std::string*)GILCallO(method, self, ctxt, sSTLStringScope);
     if (!result)
         result = new std::string{};
@@ -825,7 +825,7 @@ CPyCppyy::Executor* CPyCppyy::CreateExecutor(const std::string& fullType, cdims_
 
 // C++ classes and special cases
     Executor* result = 0;
-    if (Cppyy::TCppType_t klass = Cppyy::GetFullScope(realType)) {
+    if (Cppyy::TCppScope_t klass = Cppyy::GetFullScope(realType)) {
         if (resolvedType.find("iterator") != std::string::npos || gIteratorTypes.find(fullType) != gIteratorTypes.end()) {
             if (cpd == "")
                 return new IteratorExecutor(klass);

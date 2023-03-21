@@ -405,7 +405,7 @@ void* CPyCppyy::CPPDataMember::GetAddress(CPPInstance* pyobj)
 
 // the proxy's internal offset is calculated from the enclosing class
     ptrdiff_t offset = 0;
-    Cppyy::TCppType_t oisa = pyobj->ObjectIsA();
+    Cppyy::TCppScope_t oisa = pyobj->ObjectIsA();
     if (oisa != fEnclosingScope)
         offset = Cppyy::GetBaseOffset(oisa, fEnclosingScope, obj, 1 /* up-cast */);
 

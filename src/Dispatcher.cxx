@@ -55,9 +55,9 @@ static inline void InjectMethod(Cppyy::TCppMethod_t method, const std::string& m
 //----------------------------------------------------------------------------
 namespace {
     struct BaseInfo {
-        BaseInfo(Cppyy::TCppType_t t, std::string&& bn, std::string&& bns) :
+        BaseInfo(Cppyy::TCppScope_t t, std::string&& bn, std::string&& bns) :
             btype(t), bname(bn), bname_scoped(bns) {}
-        Cppyy::TCppType_t btype;
+        Cppyy::TCppScope_t btype;
         std::string bname;
         std::string bname_scoped;
     };
@@ -167,7 +167,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
         if (!CPPScope_Check(PyTuple_GET_ITEM(bases, ibase)))
             continue;
 
-        Cppyy::TCppType_t basetype = ((CPPScope*)PyTuple_GET_ITEM(bases, ibase))->fCppType;
+        Cppyy::TCppScope_t basetype = ((CPPScope*)PyTuple_GET_ITEM(bases, ibase))->fCppType;
 
         if (!basetype) {
             err << "base class is incomplete";

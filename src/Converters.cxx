@@ -382,7 +382,7 @@ static inline bool CArraySetArg(
 
 
 //- helper for implicit conversions ------------------------------------------
-static inline CPyCppyy::CPPInstance* ConvertImplicit(Cppyy::TCppType_t klass,
+static inline CPyCppyy::CPPInstance* ConvertImplicit(Cppyy::TCppScope_t klass,
     PyObject* pyobject, CPyCppyy::Parameter& para, CPyCppyy::CallContext* ctxt, bool manage=true)
 {
     using namespace CPyCppyy;
@@ -1966,7 +1966,7 @@ bool CPyCppyy::InstancePtrConverter<ISCONST>::SetArg(
     if (pyobj->IsSmart() && IsConstructor(ctxt->fFlags) && Cppyy::IsSmartPtr(ctxt->fCurScope))
         return false;
 
-    Cppyy::TCppType_t oisa = pyobj->ObjectIsA();
+    Cppyy::TCppScope_t oisa = pyobj->ObjectIsA();
     if (oisa && (oisa == fClass || Cppyy::IsSubclass(oisa, fClass))) {
     // depending on memory policy, some objects need releasing when passed into functions
         if (!KeepControl() && !UseStrictOwnership(ctxt))
@@ -2095,7 +2095,7 @@ bool CPyCppyy::InstanceRefConverter::SetArg(
     // smart pointers can end up here in case of a move, so preferentially match
     // the smart type directly
         bool argset = false;
-        Cppyy::TCppType_t cls = 0;
+        Cppyy::TCppScope_t cls = 0;
         if (pyobj->IsSmart()) {
             cls = pyobj->ObjectIsA(false);
             if (cls && Cppyy::IsSubclass(cls, fClass)) {
@@ -2711,10 +2711,10 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
     }
 
     CPPInstance* pyobj = (CPPInstance*)pyobject;
-    Cppyy::TCppType_t oisa = pyobj->ObjectIsA();
+    Cppyy::TCppScope_t oisa = pyobj->ObjectIsA();
 
 // for the case where we have a 'hidden' smart pointer:
-    if (Cppyy::TCppType_t tsmart = pyobj->GetSmartIsA()) {
+    if (Cppyy::TCppScope_t tsmart = pyobj->GetSmartIsA()) {
         if (Cppyy::IsSubclass(tsmart, fSmartPtrType)) {
         // depending on memory policy, some objects need releasing when passed into functions
             if (!fKeepControl && !UseStrictOwnership(ctxt))
@@ -3063,7 +3063,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdim
 // converters for known C++ classes and default (void*)
     Converter* result = nullptr;
     if (Cppyy::TCppScope_t klass = Cppyy::GetFullScope(realType)) {
-        Cppyy::TCppType_t raw{0};
+        Cppyy::TCppScope_t raw{0};
         if (Cppyy::GetSmartPtrInfo(realType, &raw, nullptr)) {
             if (cpd == "") {
                 result = new SmartPtrConverter(klass, raw, control);
@@ -3261,7 +3261,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
     Converter* result = nullptr;
     Cppyy::TCppScope_t klass = Cppyy::GetScopeFromType(type);
     if (klass || (klass = Cppyy::GetFullScope(realType))) {
-        Cppyy::TCppType_t raw{0};
+        Cppyy::TCppScope_t raw{0};
         if (Cppyy::GetSmartPtrInfo(realType, &raw, nullptr)) {
             if (cpd == "") {
                 result = new SmartPtrConverter(klass, raw, control);

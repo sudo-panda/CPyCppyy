@@ -90,7 +90,7 @@ CPPYY_DECL_EXEC(STLWString);
 
 class InstancePtrExecutor : public Executor {
 public:
-    InstancePtrExecutor(Cppyy::TCppType_t klass) : fClass(klass) {}
+    InstancePtrExecutor(Cppyy::TCppScope_t klass) : fClass(klass) {}
     virtual PyObject* Execute(
         Cppyy::TCppMethod_t, Cppyy::TCppObject_t, CallContext*);
     virtual bool HasState() { return true; }

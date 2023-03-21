@@ -42,8 +42,8 @@ inline bool RefInt_CheckExact(T* object)
 //- custom type representing typedef to pointer of class ---------------------
 struct typedefpointertoclassobject {
     PyObject_HEAD
-    Cppyy::TCppType_t fCppType;
-    PyObject*         fDict;
+    Cppyy::TCppScope_t fCppType;
+    PyObject*          fDict;
 
     ~typedefpointertoclassobject() {
         Py_DECREF(fDict);
@@ -96,7 +96,7 @@ struct vectoriterobject : public indexiterobject {
     void*                    vi_data;
     Py_ssize_t               vi_stride;
     CPyCppyy::Converter*     vi_converter;
-    Cppyy::TCppType_t        vi_klass;
+    Cppyy::TCppScope_t       vi_klass;
     int                      vi_flags;
 
     enum EFlags {

@@ -73,7 +73,7 @@ public:
 // smart pointer management
     void SetSmart(PyObject* smart_type);
     void* GetSmartObject() { return GetObjectRaw(); }
-    Cppyy::TCppType_t GetSmartIsA() const;
+    Cppyy::TCppScope_t GetSmartIsA() const;
 
 // cross-inheritence dispatch
     void SetDispatchPtr(void*);

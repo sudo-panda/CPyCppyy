@@ -202,7 +202,7 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
     subtype->tp_dealloc = (destructor)meta_dealloc;
 
 // creation of the python-side class; extend the size if this is a smart ptr
-    Cppyy::TCppType_t raw{0}; Cppyy::TCppMethod_t deref{0};
+    Cppyy::TCppScope_t raw{0}; Cppyy::TCppMethod_t deref{0};
     if (CPPScope_CheckExact(subtype)) {
         if (Cppyy::GetSmartPtrInfo(Cppyy::GetScopedFinalName(((CPPScope*)subtype)->fCppType), &raw, &deref))
             subtype->tp_basicsize = sizeof(CPPSmartClass);
@@ -274,7 +274,8 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
 
 // maps for using namespaces and tracking objects
     if (!Cppyy::IsNamespace(result->fCppType)) {
-        static Cppyy::TCppType_t exc_type = (Cppyy::TCppType_t)Cppyy::GetScope("exception", Cppyy::GetScope("std"));
+        static Cppyy::TCppScope_t exc_type = 
+                Cppyy::GetScope("exception", Cppyy::GetScope("std"));
         if (Cppyy::IsSubclass(result->fCppType, exc_type))
             result->fFlags |= CPPScope::kIsException;
         if (!(result->fFlags & CPPScope::kIsPython))
@@ -399,7 +400,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
                 const std::string& cpd = TypeManip::compound(resolved);
                 if (cpd == "*") {
                     const std::string& clean = TypeManip::clean_type(resolved, false, true);
-                    Cppyy::TCppType_t tcl = Cppyy::GetScope(clean);
+                    Cppyy::TCppScope_t tcl = Cppyy::GetScope(clean);
                     if (tcl) {
                         typedefpointertoclassobject* tpc =
                             PyObject_GC_New(typedefpointertoclassobject, &TypedefPointerToClass_Type);

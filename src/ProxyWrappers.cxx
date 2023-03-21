@@ -857,7 +857,7 @@ PyObject* CPyCppyy::BindCppObject(Cppyy::TCppObject_t address,
 // TODO: optimize for final classes
     unsigned new_flags = flags;
     if (!isRef && (gPinnedTypes.empty() || gPinnedTypes.find(klass) == gPinnedTypes.end())) {
-        Cppyy::TCppType_t clActual = klass /* XXX: Cppyy::GetActualClass(klass, address) */;
+        Cppyy::TCppScope_t clActual = klass /* XXX: Cppyy::GetActualClass(klass, address) */;
 
         if (clActual) {
             if (clActual != klass) {

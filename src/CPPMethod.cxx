@@ -819,7 +819,7 @@ bool CPyCppyy::CPPMethod::ProcessArgs(PyCallArgs& cargs)
 
     // demand CPyCppyy object, and an argument that may match down the road
         if (CPPInstance_Check(pyobj)) {
-            Cppyy::TCppType_t oisa = pyobj->ObjectIsA();
+            Cppyy::TCppScope_t oisa = pyobj->ObjectIsA();
             if (fScope == Cppyy::GetGlobalScope() ||         // free global
                 oisa == 0 ||                                    // null pointer or ctor call
                 oisa == fScope ||                               // matching types
@@ -945,7 +945,7 @@ PyObject* CPyCppyy::CPPMethod::Call(CPPInstance*& self,
     }
 
 // get its class
-    Cppyy::TCppType_t derived = self->ObjectIsA();
+    Cppyy::TCppScope_t derived = self->ObjectIsA();
 
 // calculate offset (the method expects 'this' to be an object of fScope)
     ptrdiff_t offset = 0;
