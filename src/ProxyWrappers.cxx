@@ -688,10 +688,10 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
             cppscope);
         Py_DECREF(pytcl);
 
-        // cache the result
+    // cache the result
         AddScopeToParent(parent, name, pytemplate);
 
-        // done, next step should be a call into this template
+    // done, next step should be a call into this template
         Py_XDECREF(parent);
         return pytemplate;
     }
@@ -699,7 +699,7 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
     if (Cppyy::IsEnum(scope))
         return nullptr;
 
-    // locate class by ID, if possible, to prevent parsing scopes/templates anew
+// locate class by ID, if possible, to prevent parsing scopes/templates anew
     PyObject* pyscope = GetScopeProxy(scope);
     if (pyscope) {
         if (parent) {
@@ -712,7 +712,7 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
     // if the scope was earlier found as actual, then we're done already, otherwise
     // build a new scope proxy
     if (!pyscope) {
-        // construct the base classes
+    // construct the base classes
         PyObject* pybases = BuildCppClassBases(scope);
         if (pybases != 0) {
         // create a fresh Python class, given bases, name, and empty dictionary
@@ -720,7 +720,7 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
             Py_DECREF(pybases);
         }
 
-        // fill the dictionary, if successful
+    // fill the dictionary, if successful
         if (pyscope) {
             if (BuildScopeProxyDict(scope, pyscope, flags)) {
             // something failed in building the dictionary
@@ -729,18 +729,18 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
             }
         }
 
-        // store a ref from cppyy scope id to new python class
+    // store a ref from cppyy scope id to new python class
         if (pyscope && !(((CPPScope*)pyscope)->fFlags & CPPScope::kIsInComplete)) {
             gPyClasses[scope] = PyWeakref_NewRef(pyscope, nullptr);
 
             if (!(((CPPScope*)pyscope)->fFlags & CPPScope::kIsNamespace)) {
-                // add python-style features to classes only
+            // add python-style features to classes only
                 if (!Pythonize(pyscope, Cppyy::GetScopedFinalName(scope))) {
                     Py_DECREF(pyscope);
                     pyscope = nullptr;
                 }
             } else {
-                // add to sys.modules to allow importing from this namespace
+            // add to sys.modules to allow importing from this namespace
                 PyObject* pyfullname = PyObject_GetAttr(pyscope, PyStrings::gModule);
                 CPyCppyy_PyText_AppendAndDel(&pyfullname, CPyCppyy_PyText_FromString("."));
                 CPyCppyy_PyText_AppendAndDel(&pyfullname, PyObject_GetAttr(pyscope, PyStrings::gName));
@@ -752,7 +752,7 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
         }
     }
 
-    // store on parent if found/created and complete
+// store on parent if found/created and complete
     if (pyscope && !(((CPPScope*)pyscope)->fFlags & CPPScope::kIsInComplete)) {
         // FIXME: This is to mimic original behaviour. Still required?
         if (Cppyy::IsTemplateInstantiation(scope))
@@ -761,9 +761,10 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
     }
     Py_DECREF(parent);
 
-    // all done
+// all done
     return pyscope;
 }
+
 
 //----------------------------------------------------------------------------
 PyObject* CPyCppyy::CreateExcScopeProxy(PyObject* pyscope, PyObject* pyname, PyObject* parent)

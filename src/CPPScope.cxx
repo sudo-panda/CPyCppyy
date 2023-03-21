@@ -105,8 +105,6 @@ static PyObject* meta_getmodule(CPPScope* scope, void*)
         return CPyCppyy_PyText_FromString(scope->fModuleName);
 
 // get C++ representation of outer scope
-    // std::string modname =
-    //     TypeManip::extract_namespace(Cppyy::GetScopedFinalName(scope->fCppType));
     Cppyy::TCppScope_t parent_scope = Cppyy::GetParentScope(scope->fCppType);
     if (parent_scope == Cppyy::GetGlobalScope())
         return CPyCppyy_PyText_FromString(const_cast<char*>("cppyy.gbl"));
@@ -312,13 +310,6 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
     if (pyclass == (PyObject*)&CPPInstance_Type)
         return attr;
 
-    std::string name = CPyCppyy_PyText_AsString(pyname);
-    std::string type = Cppyy::GetScopedFinalName(((CPPScope *)pyclass)->fCppType);
-    if (type == "std::complex") {
-        Cppyy::TCppScope_t temp = ((CPPScope *)pyclass)->fCppType;
-        Cppyy::DumpScope(temp);
-    }
-
     PyObject* possibly_shadowed = nullptr;
     if (attr) {
         if (CPPScope_Check(attr) && CPPScope_Check(pyclass) && !(((CPPScope*)pyclass)->fFlags & CPPScope::kIsNamespace)) {
@@ -346,8 +337,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
         return possibly_shadowed;
 
 // filter for python specials
-    // std::string name = CPyCppyy_PyText_AsString(pyname);
-    // std::string type = Cppyy::GetScopedFinalName(((CPPScope *)pyclass)->fCppType);
+    std::string name = CPyCppyy_PyText_AsString(pyname);
     if (name.size() >= 5 && name.compare(0, 2, "__") == 0 &&
             name.compare(name.size()-2, name.size(), "__") == 0)
         return possibly_shadowed;
