@@ -255,11 +255,9 @@ bool CPyCppyy::CPPMethod::InitConverters_()
 bool CPyCppyy::CPPMethod::InitExecutor_(Executor*& executor, CallContext* /* ctxt */)
 {
 // install executor conform to the return type
-    if (fMethod) {
-        executor = CreateExecutor(Cppyy::GetMethodReturnType(fMethod));
-    } else {
-        executor = CreateExecutor(Cppyy::GetScopedFinalName(fScope));
-    }
+    executor = 
+        (bool)fMethod == true ? CreateExecutor(Cppyy::GetMethodReturnType(fMethod)) \
+                              : CreateExecutor(Cppyy::GetScopedFinalName(fScope));
 
     if (!executor)
         return false;

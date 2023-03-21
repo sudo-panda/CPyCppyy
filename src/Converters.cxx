@@ -3084,11 +3084,9 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdim
                ) {
                 static STLIteratorConverter c;
                 result = &c;
-            }
-            else {
+            } else
        // -- CLING WORKAROUND
                 result = selectInstanceCnv(klass, cpd, dims, isConst, control);
-            }
         }
     } else {
         std::smatch sm;
