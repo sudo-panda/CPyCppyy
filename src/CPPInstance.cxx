@@ -79,7 +79,7 @@ struct ExtendedData {
 #define EXT_OBJECT(pyobj)  ((ExtendedData*)((pyobj)->fObject))->fObject
 #define DATA_CACHE(pyobj)  ((ExtendedData*)((pyobj)->fObject))->fDatamemberCache
 #define SMART_CLS(pyobj)   ((ExtendedData*)((pyobj)->fObject))->fSmartClass
-#define SMART_TYPE(pyobj)  SMART_CLS(pyobj)->fCppType
+#define SMART_TYPE(pyobj)  SMART_CLS(pyobj)->fCppScope
 #define DISPATCHPTR(pyobj) ((ExtendedData*)((pyobj)->fObject))->fDispatchPtr
 #define ARRAY_SIZE(pyobj)  ((ExtendedData*)((pyobj)->fObject))->fArraySize
 
@@ -365,13 +365,13 @@ static PyObject* op_getitem(CPPInstance* self, PyObject* pyidx)
     if (self->fFlags & CPPInstance::kIsPtrPtr) {
         flags = CPPInstance::kIsReference;
     } else {
-        sz = Cppyy::SizeOf(((CPPClass*)Py_TYPE(self))->fCppType);
+        sz = Cppyy::SizeOf(((CPPClass*)Py_TYPE(self))->fCppScope);
     }
 
     uintptr_t address = (uintptr_t)(flags ? self->GetObjectRaw() : self->GetObject());
     void* indexed_obj = (void*)(address+(uintptr_t)(idx*sz));
 
-    return BindCppObjectNoCast(indexed_obj, ((CPPClass*)Py_TYPE(self))->fCppType, flags);
+    return BindCppObjectNoCast(indexed_obj, ((CPPClass*)Py_TYPE(self))->fCppScope, flags);
 }
 
 //----------------------------------------------------------------------------
@@ -495,7 +495,7 @@ static inline void* cast_actual(void* obj) {
     if (((CPPInstance*)obj)->fFlags & CPPInstance::kIsActual)
         return address;
 
-    Cppyy::TCppScope_t klass = ((CPPClass*)Py_TYPE((PyObject*)obj))->fCppType;
+    Cppyy::TCppScope_t klass = ((CPPClass*)Py_TYPE((PyObject*)obj))->fCppScope;
     Cppyy::TCppScope_t clActual = klass /* XXX: Cppyy::GetActualClass(klass, address) */;
     if (clActual && clActual != klass) {
         intptr_t offset = Cppyy::GetBaseOffset(

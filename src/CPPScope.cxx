@@ -92,7 +92,7 @@ static PyObject* meta_getcppname(CPPScope* scope, void*)
 {
     if ((void*)scope == (void*)&CPPInstance_Type)
         return CPyCppyy_PyText_FromString("CPPInstance_Type");
-    return CPyCppyy_PyText_FromString(Cppyy::GetScopedFinalName(scope->fCppType).c_str());
+    return CPyCppyy_PyText_FromString(Cppyy::GetScopedFinalName(scope->fCppScope).c_str());
 }
 
 //-----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ static PyObject* meta_getmodule(CPPScope* scope, void*)
         return CPyCppyy_PyText_FromString(scope->fModuleName);
 
 // get C++ representation of outer scope
-    Cppyy::TCppScope_t parent_scope = Cppyy::GetParentScope(scope->fCppType);
+    Cppyy::TCppScope_t parent_scope = Cppyy::GetParentScope(scope->fCppScope);
     if (parent_scope == Cppyy::GetGlobalScope())
         return CPyCppyy_PyText_FromString(const_cast<char*>("cppyy.gbl"));
 
@@ -173,12 +173,12 @@ static PyObject* meta_repr(CPPScope* scope)
     }
 
 // skip in case some Python-side derived meta class
-    if (!CPPScope_Check(scope) || !scope->fCppType)
+    if (!CPPScope_Check(scope) || !scope->fCppScope)
         return PyType_Type.tp_repr((PyObject*)scope);
 
 // printing of C++ classes
     PyObject* modname = meta_getmodule(scope, nullptr);
-    std::string clName = Cppyy::GetFinalName(scope->fCppType);
+    std::string clName = Cppyy::GetFinalName(scope->fCppScope);
     const char* kind = (scope->fFlags & CPPScope::kIsNamespace) ? "namespace" : "class";
 
     PyObject* repr = CPyCppyy_PyText_FromFormat("<%s %s.%s at %p>",
@@ -204,7 +204,7 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
 // creation of the python-side class; extend the size if this is a smart ptr
     Cppyy::TCppScope_t raw{0}; Cppyy::TCppMethod_t deref{0};
     if (CPPScope_CheckExact(subtype)) {
-        if (Cppyy::GetSmartPtrInfo(Cppyy::GetScopedFinalName(((CPPScope*)subtype)->fCppType), &raw, &deref))
+        if (Cppyy::GetSmartPtrInfo(Cppyy::GetScopedFinalName(((CPPScope*)subtype)->fCppScope), &raw, &deref))
             subtype->tp_basicsize = sizeof(CPPSmartClass);
     }
 
@@ -228,14 +228,14 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
     if (!CPPScope_CheckExact(subtype) || !strstr(subtype->tp_name, "_meta") /* convention */) {
     // there has been a user meta class override in a derived class, so do
     // the consistent thing, thus allowing user control over naming
-        result->fCppType = Cppyy::GetScope(
+        result->fCppScope = Cppyy::GetScope(
             CPyCppyy_PyText_AsString(PyTuple_GET_ITEM(args, 0)));
     } else {
     // coming here from cppyy or from sub-classing in python; take the
     // C++ type from the meta class to make sure that the latter category
-    // has fCppType properly set (it inherits the meta class, but has an
+    // has fCppScope properly set (it inherits the meta class, but has an
     // otherwise unknown (or wrong) C++ type)
-        result->fCppType = ((CPPScope*)subtype)->fCppType;
+        result->fCppScope = ((CPPScope*)subtype)->fCppScope;
 
     // the following is not robust, but by design, C++ classes get their
     // dictionaries filled after creation (chicken & egg problem as they
@@ -245,7 +245,7 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
         if (3 <= PyTuple_GET_SIZE(args)) {
             PyObject* dct = PyTuple_GET_ITEM(args, 2);
             Py_ssize_t sz = PyDict_Size(dct);
-            if (0 < sz && !Cppyy::IsNamespace(result->fCppType)) {
+            if (0 < sz && !Cppyy::IsNamespace(result->fCppScope)) {
                 result->fFlags |= CPPScope::kIsPython;
                 if (1 < PyTuple_GET_SIZE(PyTuple_GET_ITEM(args, 1)))
                     result->fFlags |= CPPScope::kIsMultiCross;
@@ -257,7 +257,7 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
                 // the direct base can be useful for some templates, such as shared_ptrs,
                 // so make it accessible (the __cpp_cross__ data member also signals that
                 // this is a cross-inheritance class)
-                    PyObject* bname = CPyCppyy_PyText_FromString(Cppyy::GetBaseName(result->fCppType, 0).c_str());
+                    PyObject* bname = CPyCppyy_PyText_FromString(Cppyy::GetBaseName(result->fCppScope, 0).c_str());
                     if (PyObject_SetAttrString((PyObject*)result, "__cpp_cross__", bname) == -1)
                         PyErr_Clear();
                     Py_DECREF(bname);
@@ -269,20 +269,20 @@ static PyObject* pt_new(PyTypeObject* subtype, PyObject* args, PyObject* kwds)
 
 // if the user messed with the metaclass, then we may not have a C++ type,
 // simply return here before more damage gets done
-    if (!result->fCppType)
+    if (!result->fCppScope)
         return (PyObject*)result;
 
 // maps for using namespaces and tracking objects
-    if (!Cppyy::IsNamespace(result->fCppType)) {
+    if (!Cppyy::IsNamespace(result->fCppScope)) {
         static Cppyy::TCppScope_t exc_type = 
                 Cppyy::GetScope("exception", Cppyy::GetScope("std"));
-        if (Cppyy::IsSubclass(result->fCppType, exc_type))
+        if (Cppyy::IsSubclass(result->fCppScope, exc_type))
             result->fFlags |= CPPScope::kIsException;
         if (!(result->fFlags & CPPScope::kIsPython))
             result->fImp.fCppObjects = new CppToPyMap_t;
         else {
         // special case: the C++ objects should be stored with the associated C++, not Python, type
-            CPPClass* kls = (CPPClass*)GetScopeProxy(result->fCppType);
+            CPPClass* kls = (CPPClass*)GetScopeProxy(result->fCppScope);
             if (kls) {
                 result->fImp.fCppObjects = kls->fImp.fCppObjects;
                 Py_DECREF(kls);
@@ -357,7 +357,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
     CPPScope* klass = ((CPPScope*)pyclass);
     if (!attr) {
         Utility::FetchError(errors);
-        Cppyy::TCppScope_t scope = klass->fCppType;
+        Cppyy::TCppScope_t scope = klass->fCppScope;
 
     // namespaces may have seen updates in their list of global functions, which
     // are available as "methods" even though they're not really that
@@ -394,7 +394,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
 
     // this may be a typedef that resolves to a sugared type
         if (!attr) {
-            const std::string& lookup = Cppyy::GetScopedFinalName(klass->fCppType) + "::" + name;
+            const std::string& lookup = Cppyy::GetScopedFinalName(klass->fCppScope) + "::" + name;
             const std::string& resolved = Cppyy::ResolveName(lookup);
             if (resolved != lookup) {
                 const std::string& cpd = TypeManip::compound(resolved);
@@ -404,7 +404,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
                     if (tcl) {
                         typedefpointertoclassobject* tpc =
                             PyObject_GC_New(typedefpointertoclassobject, &TypedefPointerToClass_Type);
-                        tpc->fCppType = tcl;
+                        tpc->fCppScope = tcl;
                         tpc->fDict = PyDict_New();
                         attr = (PyObject*)tpc;
                     }
@@ -461,7 +461,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
 
     if (!attr && (klass->fFlags & CPPScope::kIsNamespace)) {
     // refresh using list as necessary
-        const std::vector<Cppyy::TCppScope_t>& uv = Cppyy::GetUsingNamespaces(klass->fCppType);
+        const std::vector<Cppyy::TCppScope_t>& uv = Cppyy::GetUsingNamespaces(klass->fCppScope);
         if (!klass->fImp.fUsing || uv.size() != klass->fImp.fUsing->size()) {
             if (klass->fImp.fUsing) {
                 for (auto pyref : *klass->fImp.fUsing) Py_DECREF(pyref);
@@ -542,7 +542,7 @@ static int meta_setattro(PyObject* pyclass, PyObject* pyname, PyObject* pyval)
     // skip if the given pyval is a descriptor already, or an unassignable class
         if (!CPyCppyy::CPPDataMember_Check(pyval) && !CPyCppyy::CPPScope_Check(pyval)) {
             std::string name = CPyCppyy_PyText_AsString(pyname);
-            if (Cppyy::CheckDatamember(((CPPScope*)pyclass)->fCppType, name))
+            if (Cppyy::CheckDatamember(((CPPScope*)pyclass)->fCppScope, name))
                 meta_getattro(pyclass, pyname);       // triggers creation
         }
     }
@@ -570,7 +570,7 @@ static PyObject* meta_reflex(CPPScope* klass, PyObject* args)
       // this is not the strict C++ definition of aggregates, but is closer to what
       // is needed for Numba and C calling conventions (TODO: probably have to check
       // for all public data types, too, and maybe for no padding?)
-        if (Cppyy::IsAggregate(klass->fCppType) || !Cppyy::HasVirtualDestructor(klass->fCppType))
+        if (Cppyy::IsAggregate(klass->fCppScope) || !Cppyy::HasVirtualDestructor(klass->fCppScope))
             Py_RETURN_TRUE;
         Py_RETURN_FALSE;
         break;
@@ -605,7 +605,7 @@ static PyObject* meta_dir(CPPScope* klass)
         return dirlist;
 
     std::set<std::string> cppnames;
-    Cppyy::GetAllCppNames(klass->fCppType, cppnames);
+    Cppyy::GetAllCppNames(klass->fCppScope, cppnames);
 
 // cleanup names
     std::set<std::string> dir_cppnames;

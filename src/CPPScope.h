@@ -52,7 +52,7 @@ public:
 
 public:
     PyHeapTypeObject   fType;
-    Cppyy::TCppScope_t fCppType;
+    Cppyy::TCppScope_t fCppScope;
     uint32_t           fFlags;
     union {
         CppToPyMap_t*           fCppObjects;     // classes only
@@ -101,7 +101,7 @@ inline CPPScope* CPPScopeMeta_New(Cppyy::TCppScope_t klass, PyObject* args)
     if (!pymeta) return pymeta;
 
 // set the klass id, for instances and Python-side derived classes to pick up
-    pymeta->fCppType         = klass;
+    pymeta->fCppScope        = klass;
     pymeta->fFlags           = CPPScope::kIsMeta;
     pymeta->fImp.fCppObjects = nullptr;
     pymeta->fOperators       = nullptr;

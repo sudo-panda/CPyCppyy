@@ -112,7 +112,7 @@ inline void* CPPInstance::GetObject()
 inline Cppyy::TCppScope_t CPPInstance::ObjectIsA(bool check_smart) const
 {
 // Retrieve the C++ type identifier (or raw type if smart).
-    if (check_smart || !IsSmart()) return ((CPPClass*)Py_TYPE(this))->fCppType;
+    if (check_smart || !IsSmart()) return ((CPPClass*)Py_TYPE(this))->fCppScope;
     return GetSmartIsA();
 }
 

@@ -189,7 +189,7 @@ PyObject* TemplateProxy::Instantiate(const std::string& fname,
     }
 
 // the following causes instantiation as necessary
-    Cppyy::TCppScope_t scope = ((CPPClass*)fTI->fPyClass)->fCppType;
+    Cppyy::TCppScope_t scope = ((CPPClass*)fTI->fPyClass)->fCppScope;
     Cppyy::TCppMethod_t cppmeth = Cppyy::GetMethodTemplate(scope, fname, proto);
     if (cppmeth) {    // overload stops here
     // A successful instantiation needs to be cached to pre-empt future instantiations. There
@@ -808,7 +808,7 @@ static PyObject* tpp_overload(TemplateProxy* pytmpl, PyObject* args)
     PyErr_Fetch(&pytype, &pyvalue, &pytrace);
 
     std::string proto = Utility::ConstructTemplateArgs(nullptr, args);
-    Cppyy::TCppScope_t scope = ((CPPClass*)pytmpl->fTI->fPyClass)->fCppType;
+    Cppyy::TCppScope_t scope = ((CPPClass*)pytmpl->fTI->fPyClass)->fCppScope;
     Cppyy::TCppMethod_t cppmeth = Cppyy::GetMethodTemplate(
         scope, pytmpl->fTI->fCppName, proto.substr(1, proto.size()-2));
 

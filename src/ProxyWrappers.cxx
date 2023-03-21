@@ -531,7 +531,7 @@ PyObject* CPyCppyy::CreateScopeProxy(const std::string& name, PyObject* parent, 
     Cppyy::TCppScope_t parent_scope = 0;
     if (parent) {
         if (CPPScope_Check(parent))
-            parent_scope = ((CPPScope*)parent)->fCppType;
+            parent_scope = ((CPPScope*)parent)->fCppScope;
         else {
             PyObject* parname = PyObject_GetAttr(parent, PyStrings::gName);
             if (!parname) {
@@ -687,7 +687,7 @@ PyObject* CPyCppyy::CreateExcScopeProxy(PyObject* pyscope, PyObject* pyname, PyO
 
 // start with creation of CPPExcInstance type base classes
     std::deque<Cppyy::TCppScope_t> uqb;
-    CollectUniqueBases(((CPPScope*)pyscope)->fCppType, uqb);
+    CollectUniqueBases(((CPPScope*)pyscope)->fCppScope, uqb);
     size_t nbases = uqb.size();
 
 // Support for multiple bases actually can not actually work as-is: the reason

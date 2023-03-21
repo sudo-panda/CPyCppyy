@@ -167,7 +167,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
         if (!CPPScope_Check(PyTuple_GET_ITEM(bases, ibase)))
             continue;
 
-        Cppyy::TCppScope_t basetype = ((CPPScope*)PyTuple_GET_ITEM(bases, ibase))->fCppType;
+        Cppyy::TCppScope_t basetype = ((CPPScope*)PyTuple_GET_ITEM(bases, ibase))->fCppScope;
 
         if (!basetype) {
             err << "base class is incomplete";
@@ -189,7 +189,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
     }
 
 // TODO: check deep hierarchy for multiple inheritance
-    bool isDeepHierarchy = klass->fCppType && base_infos.front().btype != klass->fCppType;
+    bool isDeepHierarchy = klass->fCppScope && base_infos.front().btype != klass->fCppScope;
 
 // once classes can be extended, should consider re-use; for now, since derived
 // python classes can differ in what they override, simply use different shims
@@ -443,7 +443,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
         err << "failed to retrieve the internal dispatcher";
         return false;
     }
-    klass->fCppType = disp;
+    klass->fCppScope = disp;
 
 // at this point, the dispatcher only lives in C++, as opposed to regular classes
 // that are part of the hierarchy in Python, so create it, which will cache it for

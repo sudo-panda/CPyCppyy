@@ -562,7 +562,7 @@ static PyObject* vector_iter(PyObject* v) {
             if (!vi->vi_stride) vi->vi_stride = Cppyy::SizeOf(value_type);
 
         } else if (CPPScope_Check(pyvalue_type)) {
-            vi->vi_klass = ((CPPClass*)pyvalue_type)->fCppType;
+            vi->vi_klass = ((CPPClass*)pyvalue_type)->fCppScope;
             vi->vi_converter = nullptr;
             if (!vi->vi_stride) vi->vi_stride = Cppyy::SizeOf(vi->vi_klass);
             if (!vi->vi_flags)  vi->vi_flags  = vectoriterobject::kNeedLifeLine;
@@ -1583,9 +1583,9 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
 // prefer operator-> as that returns a pointer (which is simpler since it never
 // has to deal with ref-assignment), but operator* plays better with STL iters
 // and algorithms
-    if (HasAttrDirect(pyclass, PyStrings::gDeref) && !Cppyy::IsSmartPtr(klass->fCppType))
+    if (HasAttrDirect(pyclass, PyStrings::gDeref) && !Cppyy::IsSmartPtr(klass->fCppScope))
         Utility::AddToClass(pyclass, "__getattr__", (PyCFunction)DeRefGetAttr, METH_O);
-    else if (HasAttrDirect(pyclass, PyStrings::gFollow) && !Cppyy::IsSmartPtr(klass->fCppType))
+    else if (HasAttrDirect(pyclass, PyStrings::gFollow) && !Cppyy::IsSmartPtr(klass->fCppScope))
         Utility::AddToClass(pyclass, "__getattr__", (PyCFunction)FollowGetAttr, METH_O);
 
 // for STL containers, and user classes modeled after them
@@ -1596,7 +1596,7 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
            !((PyTypeObject*)pyclass)->tp_iter) {
         if (HasAttrDirect(pyclass, PyStrings::gBegin) && HasAttrDirect(pyclass, PyStrings::gEnd)) {
         // obtain the name of the return type
-            const auto& methods = Cppyy::GetMethodsFromName(klass->fCppType, "begin");
+            const auto& methods = Cppyy::GetMethodsFromName(klass->fCppScope, "begin");
             if (!methods.empty()) {
             // check return type; if not explicitly an iterator, add it to the "known" return
             // types to add the "next" method on use
@@ -1639,7 +1639,7 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
 // comparisons to None; if no operator is available, a hook is installed for lazy
 // lookups in the global and/or class namespace
     if (HasAttrDirect(pyclass, PyStrings::gEq, true) && \
-            Cppyy::GetMethodsFromName(klass->fCppType, "__eq__").empty()) {
+            Cppyy::GetMethodsFromName(klass->fCppScope, "__eq__").empty()) {
         PyObject* cppol = PyObject_GetAttr(pyclass, PyStrings::gEq);
         if (!klass->fOperators) klass->fOperators = new Utility::PyOperators();
         klass->fOperators->fEq = cppol;
@@ -1656,7 +1656,7 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
     }
 
     if (HasAttrDirect(pyclass, PyStrings::gNe, true) && \
-            Cppyy::GetMethodsFromName(klass->fCppType, "__ne__").empty()) {
+            Cppyy::GetMethodsFromName(klass->fCppScope, "__ne__").empty()) {
         PyObject* cppol = PyObject_GetAttr(pyclass, PyStrings::gNe);
         if (!klass->fOperators) klass->fOperators = new Utility::PyOperators();
         klass->fOperators->fNe = cppol;
@@ -1683,9 +1683,9 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
         Utility::AddToClass(pyclass, "__str__", (PyCFunction)UTF8Str, METH_NOARGS);
     }
 
-    if (Cppyy::IsAggregate(((CPPClass*)pyclass)->fCppType) && name.compare(0, 5, "std::", 5) != 0) {
+    if (Cppyy::IsAggregate(((CPPClass*)pyclass)->fCppScope) && name.compare(0, 5, "std::", 5) != 0) {
     // create a pseudo-constructor to allow initializer-style object creation
-        Cppyy::TCppScope_t kls = ((CPPClass*)pyclass)->fCppType;
+        Cppyy::TCppScope_t kls = ((CPPClass*)pyclass)->fCppScope;
         std::vector<Cppyy::TCppScope_t> datamems = Cppyy::GetDatamembers(kls);
         if (!datamems.empty()) {
             std::string rname = name;
@@ -1759,7 +1759,7 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
 
     // std::vector<bool> is a special case in C++
         if (!sVectorBoolTypeID) sVectorBoolTypeID = (Cppyy::TCppType_t)Cppyy::GetScope("std::vector<bool>");
-        if (klass->fCppType == sVectorBoolTypeID) {
+        if (klass->fCppScope == sVectorBoolTypeID) {
             Utility::AddToClass(pyclass, "__getitem__", (PyCFunction)VectorBoolGetItem, METH_O);
             Utility::AddToClass(pyclass, "__setitem__", (PyCFunction)VectorBoolSetItem);
         } else {

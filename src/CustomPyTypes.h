@@ -42,7 +42,7 @@ inline bool RefInt_CheckExact(T* object)
 //- custom type representing typedef to pointer of class ---------------------
 struct typedefpointertoclassobject {
     PyObject_HEAD
-    Cppyy::TCppScope_t fCppType;
+    Cppyy::TCppScope_t fCppScope;
     PyObject*          fDict;
 
     ~typedefpointertoclassobject() {

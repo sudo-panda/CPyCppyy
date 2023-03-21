@@ -70,20 +70,20 @@ static PyObject* tptc_call(typedefpointertoclassobject* self, PyObject* args, Py
     long long addr = 0;
     if (!PyArg_ParseTuple(args, const_cast<char*>("|L"), &addr))
         return nullptr;
-    return BindCppObjectNoCast((Cppyy::TCppObject_t)(intptr_t)addr, self->fCppType);
+    return BindCppObjectNoCast((Cppyy::TCppObject_t)(intptr_t)addr, self->fCppScope);
 }
 
 //-----------------------------------------------------------------------------
 static PyObject* tptc_getcppname(typedefpointertoclassobject* self, void*)
 {
     return CPyCppyy_PyText_FromString(
-        (Cppyy::GetScopedFinalName(self->fCppType)+"*").c_str());
+        (Cppyy::GetScopedFinalName(self->fCppScope)+"*").c_str());
 }
 
 //-----------------------------------------------------------------------------
 static PyObject* tptc_name(typedefpointertoclassobject* self, void*)
 {
-    PyObject* pyclass = CPyCppyy::GetScopeProxy(self->fCppType);
+    PyObject* pyclass = CPyCppyy::GetScopeProxy(self->fCppScope);
     if (pyclass) {
         PyObject* pyname = PyObject_GetAttr(pyclass, PyStrings::gName);
         Py_DECREF(pyclass);

@@ -613,7 +613,7 @@ static PyObject* BindObject(PyObject*, PyObject* args, PyObject* kwds)
     PyObject* arg1 = PyTuple_GET_ITEM(args, 1);
     if (!CPyCppyy_PyText_Check(arg1)) {          // not string, then class
         if (CPPScope_Check(arg1))
-            cast_type = ((CPPClass*)arg1)->fCppType;
+            cast_type = ((CPPClass*)arg1)->fCppScope;
         else
             arg1 = PyObject_GetAttr(arg1, PyStrings::gName);
     } else
@@ -813,7 +813,7 @@ static PyObject* PinType(PyObject*, PyObject* pyclass)
         return nullptr;
     }
 
-    gPinnedTypes.insert(((CPPClass*)pyclass)->fCppType);
+    gPinnedTypes.insert(((CPPClass*)pyclass)->fCppScope);
 
     Py_RETURN_NONE;
 }

@@ -210,7 +210,7 @@ bool CPyCppyy::MemoryRegulator::UnregisterPyObject(CPPInstance* pyobj, PyObject*
         return false;
 
     if (unregisterHook) {
-        auto res = unregisterHook(cppobj, ((CPPClass*)pyclass)->fCppType);
+        auto res = unregisterHook(cppobj, ((CPPClass*)pyclass)->fCppScope);
         if (!res.second) return res.first;
     }
 

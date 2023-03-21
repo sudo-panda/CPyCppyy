@@ -285,7 +285,7 @@ CPyCppyy::PyCallable* CPyCppyy::Utility::FindUnaryOperator(PyObject* pyclass, co
         return nullptr;
 
     CPPClass* klass = (CPPClass*)pyclass;
-    const std::string& lcname = Cppyy::GetScopedFinalName(klass->fCppType);
+    const std::string& lcname = Cppyy::GetScopedFinalName(klass->fCppScope);
     Cppyy::TCppScope_t scope = Cppyy::GetScope(TypeManip::extract_namespace(lcname));
     return FindBinaryOperator(lcname, "", op, scope, false);
 }
@@ -468,7 +468,7 @@ static bool AddTypeName(std::string& tmpl_name, PyObject* tn, PyObject* arg,
     }
 
     if (CPPScope_Check(tn)) {
-        auto cpp_type = Cppyy::GetScopedFinalName(((CPPClass*)tn)->fCppType);
+        auto cpp_type = Cppyy::GetScopedFinalName(((CPPClass*)tn)->fCppScope);
         tmpl_name.append(cpp_type);
         if (arg) {
         // try to specialize the type match for the given object
@@ -692,7 +692,7 @@ static bool AddTypeName(std::vector<Cppyy::TCppType_t>& types, PyObject* tn,
     }
 
     if (CPPScope_Check(tn)) {
-        auto cpp_type = Cppyy::GetTypeFromScope(((CPPClass*)tn)->fCppType);
+        auto cpp_type = Cppyy::GetTypeFromScope(((CPPClass*)tn)->fCppScope);
         types.push_back(cpp_type);
         if (arg) {
         // try to specialize the type match for the given object
