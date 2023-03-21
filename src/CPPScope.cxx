@@ -460,10 +460,9 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
                 attr = PyType_Type.tp_getattro(pyclass, pyname);
                 if (!attr && PyErr_Occurred())
                     Utility::FetchError(errors);
-            
-            } else {
+            } else
                 PyType_Type.tp_setattro(pyclass, pyname, attr);
-            }
+
         } else {
             Utility::FetchError(errors);
         }
