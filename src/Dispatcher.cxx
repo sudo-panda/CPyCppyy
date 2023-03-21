@@ -130,7 +130,8 @@ static inline
 std::vector<TCppMethod_t> FindBaseMethod(TCppScope_t tbase, const std::string mtCppName)
 {
 // Recursively walk the inheritance tree to find the overloads of the named method
-    auto result = GetMethodsFromName(tbase, mtCppName);
+    std::vector<TCppMethod_t> result;
+    result = GetMethodsFromName(tbase, mtCppName);
     if (result.empty()) {
         for (TCppIndex_t ibase = 0; ibase < GetNumBases(tbase); ++ibase) {
             TCppScope_t b = GetScope(GetBaseName(tbase, ibase));
@@ -388,12 +389,13 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
             if (Cppyy::IsProtectedData(data)) {
                 const std::string dm_name = Cppyy::GetFinalName(data);
                 if (dm_name != "_internal_self") {
-                    protected_names.insert(dm_name);
+                    const std::string& dname = Cppyy::GetFinalName(data);
+                    protected_names.insert(dname);
                     if (!setPublic) {
                         code << "public:\n";
                         setPublic = true;
                     }
-                    code << "  using " << binfo.bname << "::" << dm_name << ";\n";
+                    code << "  using " << binfo.bname << "::" << dname << ";\n";
                 }
             }
         }

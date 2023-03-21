@@ -8,7 +8,7 @@
 #include "ProxyWrappers.h"
 #include "PyStrings.h"
 #include "TypeManip.h"
-// #include "SignalTryCatch.h"
+#include "SignalTryCatch.h"
 #include "Utility.h"
 
 #include "CPyCppyy/PyException.h"
@@ -199,32 +199,31 @@ inline PyObject* CPyCppyy::CPPMethod::ExecuteProtected(
 // fatal signal
     PyObject* result = 0;
 
-    // XXX: replace with Cling code
-    // CLING_EXCEPTION_TRY {    // copy call environment to be able to jump back on signal
-    //     result = ExecuteFast(self, offset, ctxt);
-    // } CLING_EXCEPTION_CATCH(excode) {
+    CLING_EXCEPTION_TRY {    // copy call environment to be able to jump back on signal
+        result = ExecuteFast(self, offset, ctxt);
+    } CLING_EXCEPTION_CATCH(excode) {
     // report any outstanding Python exceptions first
-    //    if (PyErr_Occurred()) {
-    //        std::cerr << "Python exception outstanding during C++ longjmp:" << std::endl;
-    //        PyErr_Print();
-    //        std::cerr << std::endl;
-    //    }
+        if (PyErr_Occurred()) {
+            std::cerr << "Python exception outstanding during C++ longjmp:" << std::endl;
+            PyErr_Print();
+            std::cerr << std::endl;
+        }
 
-    // // unfortunately, the excodes are not the ones from signal.h, but enums from TSysEvtHandler.h
-    //     if (excode == 0)
-    //         PyErr_SetString(gBusException, "bus error in C++; program state was reset");
-    //     else if (excode == 1)
-    //         PyErr_SetString(gSegvException, "segfault in C++; program state was reset");
-    //     else if (excode == 4)
-    //         PyErr_SetString(gIllException, "illegal instruction in C++; program state was reset");
-    //     else if (excode == 5)
-    //         PyErr_SetString(gAbrtException, "abort from C++; program state was reset");
-    //     else if (excode == 12)
-    //         PyErr_SetString(PyExc_FloatingPointError, "floating point exception in C++; program state was reset");
-    //     else
-    //         PyErr_SetString(PyExc_SystemError, "problem in C++; program state was reset");
-    //     result = 0;
-    // } CLING_EXCEPTION_ENDTRY;
+    // unfortunately, the excodes are not the ones from signal.h, but enums from TSysEvtHandler.h
+        if (excode == 0)
+            PyErr_SetString(gBusException, "bus error in C++; program state was reset");
+        else if (excode == 1)
+            PyErr_SetString(gSegvException, "segfault in C++; program state was reset");
+        else if (excode == 4)
+            PyErr_SetString(gIllException, "illegal instruction in C++; program state was reset");
+        else if (excode == 5)
+            PyErr_SetString(gAbrtException, "abort from C++; program state was reset");
+        else if (excode == 12)
+            PyErr_SetString(PyExc_FloatingPointError, "floating point exception in C++; program state was reset");
+        else
+            PyErr_SetString(PyExc_SystemError, "problem in C++; program state was reset");
+        result = 0;
+    } CLING_EXCEPTION_ENDTRY;
 
     return result;
 }
