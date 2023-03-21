@@ -297,25 +297,25 @@ static int BuildScopeProxyDict(Cppyy::TCppScope_t scope, PyObject* pyclass, cons
     }
 
 // add proxies for un-instantiated/non-overloaded templated methods
-    // const Cppyy::TCppIndex_t nTemplMethods = isNamespace ? 0 : Cppyy::GetNumTemplatedMethods(scope);
-    // for (Cppyy::TCppIndex_t imeth = 0; imeth < nTemplMethods; ++imeth) {
-    //     const std::string mtCppName = Cppyy::GetTemplatedMethodName(scope, imeth);
-    // // the number of arguments isn't known until instantiation and as far as C++ is concerned, all
-    // // same-named operators are simply overloads; so will pre-emptively add both names if with and
-    // // without arguments differ, letting the normal overload mechanism resolve on call
-    //     bool isConstructor = Cppyy::IsTemplatedConstructor(scope, imeth);
-    //
-    // // first add with no arguments
-    //     std::string mtName0 = isConstructor ? "__init__" : Utility::MapOperatorName(mtCppName, false);
-    //     sync_templates(pyclass, mtCppName, mtName0);
-    //
-    // // then add when taking arguments, if this method is different
-    //     if (!isConstructor) {
-    //         std::string mtName1 = Utility::MapOperatorName(mtCppName, true);
-    //         if (mtName0 != mtName1)
-    //             sync_templates(pyclass, mtCppName, mtName1);
-    //     }
-    // }
+    const Cppyy::TCppIndex_t nTemplMethods = isNamespace ? 0 : Cppyy::GetNumTemplatedMethods(scope);
+    for (Cppyy::TCppIndex_t imeth = 0; imeth < nTemplMethods; ++imeth) {
+        const std::string mtCppName = Cppyy::GetTemplatedMethodName(scope, imeth);
+    // the number of arguments isn't known until instantiation and as far as C++ is concerned, all
+    // same-named operators are simply overloads; so will pre-emptively add both names if with and
+    // without arguments differ, letting the normal overload mechanism resolve on call
+        bool isConstructor = Cppyy::IsTemplatedConstructor(scope, imeth);
+
+    // first add with no arguments
+        std::string mtName0 = isConstructor ? "__init__" : Utility::MapOperatorName(mtCppName, false);
+        sync_templates(pyclass, mtCppName, mtName0);
+
+    // then add when taking arguments, if this method is different
+        if (!isConstructor) {
+            std::string mtName1 = Utility::MapOperatorName(mtCppName, true);
+            if (mtName0 != mtName1)
+                sync_templates(pyclass, mtCppName, mtName1);
+        }
+    }
 
 // add a pseudo-default ctor, if none defined
     if (!hasConstructor) {
@@ -377,29 +377,29 @@ static int BuildScopeProxyDict(Cppyy::TCppScope_t scope, PyObject* pyclass, cons
             continue;
 
     // enum datamembers (this in conjunction with previously collected enums above)
-        // if (Cppyy::IsEnumType(Cppyy::GetDatamemberType(datamember)) && Cppyy::IsStaticData(scope, idata)) {
-        // // some implementation-specific data members have no address: ignore them
-        //     if (!Cppyy::GetDatamemberOffset(datamember))
-        //         continue;
-        //
-        // // two options: this is a static variable, or it is the enum value, the latter
-        // // already exists, so check for it and move on if set
-        //     PyObject* eset = PyObject_GetAttrString(pyclass,
-        //         const_cast<char*>(Cppyy::GetDatamemberName(scope, idata).c_str()));
-        //     if (eset) {
-        //         Py_DECREF(eset);
-        //         continue;
-        //     }
-        //
-        //     PyErr_Clear();
-        //
-        // // it could still be that this is an anonymous enum, which is not in the list
-        // // provided by the class
-        //     if (strstr(Cppyy::GetDatamemberType(scope, idata).c_str(), "(anonymous)") != 0) {
-        //         AddPropertyToClass(pyclass, scope, idata);
-        //         continue;
-        //     }
-        // }
+        if (Cppyy::IsEnumType(Cppyy::GetDatamemberType(datamember)) && Cppyy::IsStaticDatamember(datamember)) {
+        // some implementation-specific data members have no address: ignore them
+            if (!Cppyy::GetDatamemberOffset(datamember))
+                continue;
+
+        // two options: this is a static variable, or it is the enum value, the latter
+        // already exists, so check for it and move on if set
+            PyObject* eset = PyObject_GetAttrString(pyclass,
+                const_cast<char*>(Cppyy::GetFinalName(datamember).c_str()));
+            if (eset) {
+                Py_DECREF(eset);
+                continue;
+            }
+
+            PyErr_Clear();
+
+        // it could still be that this is an anonymous enum, which is not in the list
+        // provided by the class
+            if (strstr(Cppyy::GetDatamemberTypeAsString(datamember).c_str(), "(anonymous)") != 0) {
+                AddPropertyToClass(pyclass, scope, datamember);
+                continue;
+            }
+        }
 
     // properties (aka public (static) data members)
         AddPropertyToClass(pyclass, scope, datamember);
