@@ -33,7 +33,7 @@
 namespace CPyCppyy {
     extern PyObject* gThisModule;
     extern PyObject* gPyTypeMap;
-    extern std::set<Cppyy::TCppType_t> gPinnedTypes;
+    extern std::set<Cppyy::TCppScope_t> gPinnedScopes;
 }
 
 // to prevent having to walk scopes, track python classes by C++ class
@@ -856,7 +856,7 @@ PyObject* CPyCppyy::BindCppObject(Cppyy::TCppObject_t address,
 // successful, no down-casting is attempted?
 // TODO: optimize for final classes
     unsigned new_flags = flags;
-    if (!isRef && (gPinnedTypes.empty() || gPinnedTypes.find(klass) == gPinnedTypes.end())) {
+    if (!isRef && (gPinnedScopes.empty() || gPinnedScopes.find(klass) == gPinnedScopes.end())) {
         Cppyy::TCppScope_t clActual = klass /* XXX: Cppyy::GetActualClass(klass, address) */;
 
         if (clActual) {

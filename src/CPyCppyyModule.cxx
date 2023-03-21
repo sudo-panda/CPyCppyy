@@ -225,7 +225,7 @@ namespace CPyCppyy {
     PyObject* gIllException  = nullptr;
     PyObject* gAbrtException = nullptr;
     std::map<std::string, std::vector<PyObject*>> gPythonizations;
-    std::set<Cppyy::TCppScope_t> gPinnedTypes;
+    std::set<Cppyy::TCppScope_t> gPinnedScopes;
     std::ostringstream gCapturedError;
     std::streambuf* gOldErrorBuffer = nullptr;
 }
@@ -813,7 +813,7 @@ static PyObject* PinType(PyObject*, PyObject* pyclass)
         return nullptr;
     }
 
-    gPinnedTypes.insert(((CPPClass*)pyclass)->fCppScope);
+    gPinnedScopes.insert(((CPPClass*)pyclass)->fCppScope);
 
     Py_RETURN_NONE;
 }
