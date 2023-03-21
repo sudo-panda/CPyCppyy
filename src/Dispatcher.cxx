@@ -56,8 +56,8 @@ static inline void InjectMethod(Cppyy::TCppMethod_t method, const std::string& m
 namespace {
     struct BaseInfo {
         BaseInfo(Cppyy::TCppScope_t t, std::string&& bn, std::string&& bns) :
-            btype(t), bname(bn), bname_scoped(bns) {}
-        Cppyy::TCppScope_t btype;
+            bclass(t), bname(bn), bname_scoped(bns) {}
+        Cppyy::TCppScope_t bclass;
         std::string bname;
         std::string bname_scoped;
     };
@@ -189,7 +189,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
     }
 
 // TODO: check deep hierarchy for multiple inheritance
-    bool isDeepHierarchy = klass->fCppScope && base_infos.front().btype != klass->fCppScope;
+    bool isDeepHierarchy = klass->fCppScope && base_infos.front().bclass != klass->fCppScope;
 
 // once classes can be extended, should consider re-use; for now, since derived
 // python classes can differ in what they override, simply use different shims
@@ -253,7 +253,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
     for (BaseInfos_t::size_type ibase = 0; ibase < base_infos.size(); ++ibase) {
         const auto& binfo = base_infos[ibase];
 
-        std::vector<Cppyy::TCppMethod_t> methods = Cppyy::GetClassMethods(binfo.btype);
+        std::vector<Cppyy::TCppMethod_t> methods = Cppyy::GetClassMethods(binfo.bclass);
         bool cctor_found = false, default_found = false, any_ctor_found = false;
         for (auto &method : methods) {
             if (Cppyy::IsConstructor(method)) {
@@ -311,9 +311,9 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
 
     // support for templated ctors in single inheritance (TODO: also multi possible?)
         if (base_infos.size() == 1) {
-            const Cppyy::TCppIndex_t nTemplMethods = Cppyy::GetNumTemplatedMethods(binfo.btype);
+            const Cppyy::TCppIndex_t nTemplMethods = Cppyy::GetNumTemplatedMethods(binfo.bclass);
             for (Cppyy::TCppIndex_t imeth = 0; imeth < nTemplMethods; ++imeth) {
-                if (Cppyy::IsTemplatedConstructor(binfo.btype, imeth)) {
+                if (Cppyy::IsTemplatedConstructor(binfo.bclass, imeth)) {
                     any_ctor_found = true;
                     has_tmpl_ctors += 1;
                     break;        // one suffices to map as argument packs are used
@@ -330,10 +330,10 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
 // try to locate left-overs in base classes
     for (const auto& binfo : base_infos) {
         if (PyDict_Size(clbs)) {
-            size_t nbases = Cppyy::GetNumBases(binfo.btype);
+            size_t nbases = Cppyy::GetNumBases(binfo.bclass);
             for (size_t ibase = 0; ibase < nbases; ++ibase) {
                 Cppyy::TCppScope_t tbase = (Cppyy::TCppScope_t)Cppyy::GetScope( \
-                    Cppyy::GetBaseName(binfo.btype, ibase));
+                    Cppyy::GetBaseName(binfo.bclass, ibase));
 
                 PyObject* keys = PyDict_Keys(clbs);
                 for (Py_ssize_t i = 0; i < PyList_GET_SIZE(keys); ++i) {
@@ -384,7 +384,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
 // pull in data members that are protected
     bool setPublic = false;
     for (const auto& binfo : base_infos) {
-        std::vector<Cppyy::TCppScope_t> datamems = Cppyy::GetDatamembers(binfo.btype);
+        std::vector<Cppyy::TCppScope_t> datamems = Cppyy::GetDatamembers(binfo.bclass);
         for (auto data : datamems) {
             if (Cppyy::IsProtectedData(data)) {
                 const std::string dm_name = Cppyy::GetFinalName(data);
@@ -406,7 +406,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
     code << "public:\n  static void _init_dispatchptr(" << derivedName << "* inst, PyObject* self) {\n";
     if (1 < base_infos.size()) {
         for (const auto& binfo : base_infos) {
-             if (Cppyy::CheckDatamember(binfo.btype, "_internal_self")) {
+             if (Cppyy::CheckDatamember(binfo.bclass, "_internal_self")) {
                  code << "    " << binfo.bname << "::_init_dispatchptr(inst, self);\n";
                  disp_inited += 1;
              }
