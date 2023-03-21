@@ -2959,9 +2959,9 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(const std::string& fullType, cdim
     }
 
 //-- nothing? ok, collect information about the type and possible qualifiers/decorators
-    bool isConst = strncmp(/* resolvedType */ fullType.c_str(), "const", 5) == 0;
-    const std::string& cpd = TypeManip::compound(/* resolvedType */ fullType);
-    std::string realType   = TypeManip::clean_type(/* resolvedType */ fullType, false, true);
+    bool isConst = strncmp(resolvedType.c_str(), "const", 5) == 0;
+    const std::string& cpd = TypeManip::compound(resolvedType);
+    std::string realType   = TypeManip::clean_type(resolvedType, false, true);
 
 // accept unqualified type (as python does not know about qualifiers)
     h = gConvFactories.find((isConst ? "const " : "") + realType + cpd);

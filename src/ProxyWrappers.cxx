@@ -529,9 +529,9 @@ PyObject* CPyCppyy::CreateScopeProxy(PyObject*, PyObject* args)
 //----------------------------------------------------------------------------
 PyObject* CPyCppyy::CreateScopeProxy(const std::string& name, PyObject* parent, const unsigned flags)
 {
-   // Build a python shadow class for the named C++ class or namespace.
+// Build a python shadow class for the named C++ class or namespace.
 
-    // determine complete scope name, if a python parent has been given
+// determine complete scope name, if a python parent has been given
     Cppyy::TCppScope_t parent_scope = 0;
     if (parent) {
         if (CPPScope_Check(parent))
@@ -554,8 +554,7 @@ PyObject* CPyCppyy::CreateScopeProxy(const std::string& name, PyObject* parent, 
         Py_INCREF(parent);
     }
 
-    // retrieve C++ class (this verifies name, and is therefore done first)
-    // const std::string& lookup = scName.empty() ? name : (scName+"::"+name);
+// retrieve C++ class (this verifies name, and is therefore done first)
     Cppyy::TCppScope_t klass = Cppyy::GetScope(name, parent_scope);
 
     if (!(bool)klass) {
