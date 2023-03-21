@@ -412,7 +412,7 @@ public:
                       Cppyy::TCppScope_t underlying,
                       bool keepControl = false,
                       bool isRef = false)
-        : fSmartPtrType(smart), fUnderlyingType(underlying),
+        : fSmartPtrScope(smart), fUnderlyingType(underlying),
           fKeepControl(keepControl), fIsRef(isRef) {}
 
 public:
@@ -424,7 +424,7 @@ public:
 protected:
     virtual bool GetAddressSpecialCase(PyObject*, void*&) { return false; }
 
-    Cppyy::TCppScope_t  fSmartPtrType;
+    Cppyy::TCppScope_t  fSmartPtrScope;
     Cppyy::TCppScope_t  fUnderlyingType;
     bool                fKeepControl;
     bool                fIsRef;

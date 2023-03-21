@@ -2715,16 +2715,16 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
 
 // for the case where we have a 'hidden' smart pointer:
     if (Cppyy::TCppScope_t tsmart = pyobj->GetSmartIsA()) {
-        if (Cppyy::IsSubclass(tsmart, fSmartPtrType)) {
+        if (Cppyy::IsSubclass(tsmart, fSmartPtrScope)) {
         // depending on memory policy, some objects need releasing when passed into functions
             if (!fKeepControl && !UseStrictOwnership(ctxt))
                 ((CPPInstance*)pyobject)->CppOwns();
 
         // calculate offset between formal and actual arguments
             para.fValue.fVoidp = pyobj->GetSmartObject();
-            if (tsmart != fSmartPtrType) {
+            if (tsmart != fSmartPtrScope) {
                 para.fValue.fIntPtr += Cppyy::GetBaseOffset(
-                    tsmart, fSmartPtrType, para.fValue.fVoidp, 1 /* up-cast */);
+                    tsmart, fSmartPtrScope, para.fValue.fVoidp, 1 /* up-cast */);
             }
 
         // set pointer (may be null) and declare success
@@ -2734,12 +2734,12 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
     }
 
 // for the case where we have an 'exposed' smart pointer:
-    if (!pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fSmartPtrType)) {
+    if (!pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fSmartPtrScope)) {
     // calculate offset between formal and actual arguments
         para.fValue.fVoidp = pyobj->GetObject();
-        if (oisa != fSmartPtrType) {
+        if (oisa != fSmartPtrScope) {
             para.fValue.fIntPtr += Cppyy::GetBaseOffset(
-                oisa, fSmartPtrType, para.fValue.fVoidp, 1 /* up-cast */);
+                oisa, fSmartPtrScope, para.fValue.fVoidp, 1 /* up-cast */);
         }
 
     // set pointer (may be null) and declare success
@@ -2750,7 +2750,7 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
 // for the case where we have an ordinary object to convert
     if (!pyobj->IsSmart() && Cppyy::IsSubclass(oisa, fUnderlyingType)) {
     // create the relevant smart pointer and make the pyobject "smart"
-        CPPInstance* pysmart = (CPPInstance*)ConvertImplicit(fSmartPtrType, pyobject, para, ctxt, false);
+        CPPInstance* pysmart = (CPPInstance*)ConvertImplicit(fSmartPtrScope, pyobject, para, ctxt, false);
         if (!CPPInstance_Check(pysmart)) {
             Py_XDECREF(pysmart);
             return false;
@@ -2758,7 +2758,7 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
 
     // copy internals from the fresh smart object to the original, making it smart
         pyobj->GetObjectRaw() = pysmart->GetSmartObject();
-        pyobj->SetSmart(CreateScopeProxy(fSmartPtrType)); //(PyObject*)Py_TYPE(pysmart));
+        pyobj->SetSmart(CreateScopeProxy(fSmartPtrScope)); //(PyObject*)Py_TYPE(pysmart));
         pyobj->PythonOwns();
         pysmart->CppOwns();
         Py_DECREF(pysmart);
@@ -2778,10 +2778,10 @@ bool CPyCppyy::SmartPtrConverter::SetArg(
 
 PyObject* CPyCppyy::SmartPtrConverter::FromMemory(void* address)
 {
-    if (!address || !fSmartPtrType)
+    if (!address || !fSmartPtrScope)
         return nullptr;
 
-    return BindCppObjectNoCast(address, fSmartPtrType);
+    return BindCppObjectNoCast(address, fSmartPtrScope);
 }
 
 
