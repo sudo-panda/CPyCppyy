@@ -626,13 +626,13 @@ PyObject* VectorGetItem(CPPInstance* self, PySliceObject* index)
 }
 
 
-static Cppyy::TCppScope_t sVectorBoolTypeID = (Cppyy::TCppScope_t)0;
+static Cppyy::TCppScope_t sVectorBoolScope = (Cppyy::TCppScope_t)0;
 
 PyObject* VectorBoolGetItem(CPPInstance* self, PyObject* idx)
 {
 // std::vector<bool> is a special-case in C++, and its return type depends on
 // the compiler: treat it special here as well
-    if (!CPPInstance_Check(self) || self->ObjectIsA() != sVectorBoolTypeID) {
+    if (!CPPInstance_Check(self) || self->ObjectIsA() != sVectorBoolScope) {
         PyErr_Format(PyExc_TypeError,
             "require object of type std::vector<bool>, but %s given",
             Cppyy::GetScopedFinalName(self->ObjectIsA()).c_str());
@@ -686,7 +686,7 @@ PyObject* VectorBoolSetItem(CPPInstance* self, PyObject* args)
 {
 // std::vector<bool> is a special-case in C++, and its return type depends on
 // the compiler: treat it special here as well
-    if (!CPPInstance_Check(self) || self->ObjectIsA() != sVectorBoolTypeID) {
+    if (!CPPInstance_Check(self) || self->ObjectIsA() != sVectorBoolScope) {
         PyErr_Format(PyExc_TypeError,
             "require object of type std::vector<bool>, but %s given",
             Cppyy::GetScopedFinalName(self->ObjectIsA()).c_str());
@@ -1758,8 +1758,8 @@ bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
     if (IsTemplatedSTLClass(name, "vector")) {
 
     // std::vector<bool> is a special case in C++
-        if (!sVectorBoolTypeID) sVectorBoolTypeID = (Cppyy::TCppType_t)Cppyy::GetScope("std::vector<bool>");
-        if (klass->fCppScope == sVectorBoolTypeID) {
+        if (!sVectorBoolScope) sVectorBoolScope = Cppyy::GetScope("std::vector<bool>");
+        if (klass->fCppScope == sVectorBoolScope) {
             Utility::AddToClass(pyclass, "__getitem__", (PyCFunction)VectorBoolGetItem, METH_O);
             Utility::AddToClass(pyclass, "__setitem__", (PyCFunction)VectorBoolSetItem);
         } else {
