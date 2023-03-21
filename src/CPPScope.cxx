@@ -402,24 +402,24 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
         }
 
     // this may be a typedef that resolves to a sugared type
-        // if (!attr) {
-        //     const std::string& lookup = Cppyy::GetScopedFinalName(klass->fCppType) + "::" + name;
-        //     // XXX: What to do here? const std::string& resolved = Cppyy::ResolveName(lookup);
-        //     if (resolved != lookup) {
-        //         const std::string& cpd = TypeManip::compound(resolved);
-        //         if (cpd == "*") {
-        //             const std::string& clean = TypeManip::clean_type(resolved, false, true);
-        //             Cppyy::TCppType_t tcl = Cppyy::GetScope(clean);
-        //             if (tcl) {
-        //                 typedefpointertoclassobject* tpc =
-        //                     PyObject_GC_New(typedefpointertoclassobject, &TypedefPointerToClass_Type);
-        //                 tpc->fCppType = tcl;
-        //                 tpc->fDict = PyDict_New();
-        //                 attr = (PyObject*)tpc;
-        //             }
-        //         }
-        //     }
-        // }
+        if (!attr) {
+            const std::string& lookup = Cppyy::GetScopedFinalName(klass->fCppType) + "::" + name;
+            const std::string& resolved = Cppyy::ResolveName(lookup);
+            if (resolved != lookup) {
+                const std::string& cpd = TypeManip::compound(resolved);
+                if (cpd == "*") {
+                    const std::string& clean = TypeManip::clean_type(resolved, false, true);
+                    Cppyy::TCppType_t tcl = Cppyy::GetScope(clean);
+                    if (tcl) {
+                        typedefpointertoclassobject* tpc =
+                            PyObject_GC_New(typedefpointertoclassobject, &TypedefPointerToClass_Type);
+                        tpc->fCppType = tcl;
+                        tpc->fDict = PyDict_New();
+                        attr = (PyObject*)tpc;
+                    }
+                }
+            }
+        }
 
     // function templates that have not been instantiated (namespaces _may_ have already
     // been taken care of, by their general function lookup above)
@@ -458,10 +458,9 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
                 Py_DECREF(attr);
                 // The call below goes through "dm_get"
                 attr = PyType_Type.tp_getattro(pyclass, pyname);
-
-                if (!attr && PyErr_Occurred()) {
+                if (!attr && PyErr_Occurred())
                     Utility::FetchError(errors);
-                }
+            
             } else {
                 PyType_Type.tp_setattro(pyclass, pyname, attr);
             }
