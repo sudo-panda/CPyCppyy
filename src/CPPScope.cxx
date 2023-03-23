@@ -444,7 +444,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
                 if (Cppyy::IsClass(scope))
                     PyType_Type.tp_setattro(pyclass, pyname, attr);
                 else
-                  PyType_Type.tp_setattro((PyObject*)Py_TYPE(pyclass), pyname, attr);
+                    PyType_Type.tp_setattro((PyObject*)Py_TYPE(pyclass), pyname, attr);
 
                 Py_DECREF(attr);
                 // The call below goes through "dm_get"

@@ -2041,6 +2041,7 @@ bool CPyCppyy::InstanceConverter::SetArg(
             para.fValue.fVoidp = pyobj->GetObject();
             if (!para.fValue.fVoidp)
                 return false;
+
             if (oisa != fClass) {
                 para.fValue.fIntPtr += Cppyy::GetBaseOffset(
                     pyobj->ObjectIsA(), fClass, para.fValue.fVoidp, 1 /* up-cast */);
