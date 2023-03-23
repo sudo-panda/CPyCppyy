@@ -449,7 +449,7 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
 // that are part of the hierarchy in Python, so create it, which will cache it for
 // later use by e.g. the MemoryRegulator
     unsigned int flags = (unsigned int)(klass->fFlags & CPPScope::kIsMultiCross);
-    PyObject* disp_proxy = CPyCppyy::CreateScopeProxy(disp, 0, flags);
+    PyObject* disp_proxy = CPyCppyy::CreateScopeProxy(disp, /* parent_scope */ 0, flags);
     if (flags) ((CPPScope*)disp_proxy)->fFlags |= CPPScope::kIsMultiCross;
     ((CPPScope*)disp_proxy)->fFlags |= CPPScope::kIsPython;
 
