@@ -197,7 +197,10 @@ bool CPyCppyy::Utility::AddToClass(
     PyObject* func = PyCFunction_New(pdef, nullptr);
     PyObject* name = CPyCppyy_PyText_InternFromString(pdef->ml_name);
     PyObject* method = CustomInstanceMethod_New(func, nullptr, pyclass);
+    PyObject* pytype = 0, *pyvalue = 0, *pytrace = 0;
+    PyErr_Fetch(&pytype, &pyvalue, &pytrace);
     bool isOk = PyType_Type.tp_setattro(pyclass, name, method) == 0;
+    PyErr_Restore(pytype, pyvalue, pytrace);
     Py_DECREF(method);
     Py_DECREF(name);
     Py_DECREF(func);
