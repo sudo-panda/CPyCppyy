@@ -514,7 +514,10 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
     } else {
     // not found: prepare a full error report
         PyObject* topmsg = nullptr;
+        PyObject* pytype = 0, *pyvalue = 0, *pytrace = 0;
+        PyErr_Fetch(&pytype, &pyvalue, &pytrace);
         PyObject* sklass = PyObject_Str(pyclass);
+        PyErr_Restore(pytype, pyvalue, pytrace);
         if (sklass) {
             topmsg = CPyCppyy_PyText_FromFormat("%s has no attribute \'%s\'. Full details:",
                 CPyCppyy_PyText_AsString(sklass), CPyCppyy_PyText_AsString(pyname));
