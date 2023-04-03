@@ -3189,6 +3189,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
     }
 
 // resolve typedefs etc.
+    Cppyy::TCppType_t resolvedType = Cppyy::ResolveType(type);
     const std::string& resolvedTypeStr = Cppyy::GetTypeAsString(resolvedType);
 
 // a full, qualified matching converter is preferred
@@ -3202,6 +3203,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 //-- nothing? ok, collect information about the type and possible qualifiers/decorators
     bool isConst = strncmp(resolvedTypeStr.c_str(), "const", 5) == 0;
     const std::string& cpd = TypeManip::compound(resolvedTypeStr);
+    Cppyy::TCppType_t realType = Cppyy::GetRealType(type);
     std::string realTypeStr   = TypeManip::clean_type(resolvedTypeStr, false, true);
     std::string realUnresolvedTypeStr   = TypeManip::clean_type(fullType, false, true);
 
@@ -3272,7 +3274,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
         } else
             cnv = CreateConverter(value_type);
         if (cnv || use_byte_cnv)
-            return new InitializerListConverter(Cppyy::GetScope(realTypeStr),
+            return new InitializerListConverter(Cppyy::GetScopeFromType(realType),
                     CreateConverter(value_type), cnv, Cppyy::SizeOf(value_type));
     }
 
@@ -3285,7 +3287,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 
     // get actual converter for normal passing
         Converter* cnv = selectInstanceCnv(
-            Cppyy::GetScope(realTypeStr), cpd, dims, isConst, control);
+            Cppyy::GetScopeFromType(realType), cpd, dims, isConst, control);
 
         if (cnv) {
         // get the type of the underlying (TODO: use target_type?)
