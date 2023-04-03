@@ -3189,24 +3189,24 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
     }
 
 // resolve typedefs etc.
-    const std::string& resolvedType = Cppyy::GetTypeAsString(Cppyy::ResolveType(type));
+    const std::string& resolvedTypeStr = Cppyy::GetTypeAsString(resolvedType);
 
 // a full, qualified matching converter is preferred
-    if (resolvedType != fullType) {
-        h = gConvFactories.find(resolvedType);
+    if (resolvedTypeStr != fullType) {
+        h = gConvFactories.find(resolvedTypeStr);
         if (h != gConvFactories.end()) {
             return (h->second)(dims);
         }
     }
 
 //-- nothing? ok, collect information about the type and possible qualifiers/decorators
-    bool isConst = strncmp(resolvedType.c_str(), "const", 5) == 0;
-    const std::string& cpd = TypeManip::compound(resolvedType);
-    std::string realType   = TypeManip::clean_type(resolvedType, false, true);
-    std::string realUnresolvedType   = TypeManip::clean_type(fullType, false, true);
+    bool isConst = strncmp(resolvedTypeStr.c_str(), "const", 5) == 0;
+    const std::string& cpd = TypeManip::compound(resolvedTypeStr);
+    std::string realTypeStr   = TypeManip::clean_type(resolvedTypeStr, false, true);
+    std::string realUnresolvedTypeStr   = TypeManip::clean_type(fullType, false, true);
 
 // accept unqualified type (as python does not know about qualifiers)
-    h = gConvFactories.find((isConst ? "const " : "") + realType + cpd);
+    h = gConvFactories.find((isConst ? "const " : "") + realTypeStr + cpd);
     if (h != gConvFactories.end()) {
         return (h->second)(dims);
     }
@@ -3214,7 +3214,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 // drop const, as that is mostly meaningless to python (with the exception
 // of c-strings, but those are specialized in the converter map)
     if (isConst) {
-        h = gConvFactories.find(realType + cpd);
+        h = gConvFactories.find(realTypeStr + cpd);
         if (h != gConvFactories.end()) {
             return (h->second)(dims);
         }
@@ -3223,11 +3223,11 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 //-- still nothing? try pointer instead of array (for builtins)
     if (cpd.compare(0, 3, "*[]") == 0) {
     // special case, array of pointers
-        h = gConvFactories.find(realType + " ptr");
+        h = gConvFactories.find(realTypeStr + " ptr");
         if (h != gConvFactories.end()) {
         // upstream treats the pointer type as the array element type, but that pointer is
         // treated as a low-level view as well, unless it's a void*/char* so adjust the dims
-            if (realType != "void" && realType != "char") {
+            if (realTypeStr != "void" && realTypeStr != "char") {
                 dim_t newdim = dims.ndim() == UNKNOWN_SIZE ? 2 : dims.ndim()+1;
                 dims_t newdims = dims_t(newdim);
             // TODO: sometimes the array size is known and can thus be verified; however,
@@ -3246,22 +3246,22 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 
     } else if (!cpd.empty() && (std::string::size_type)std::count(cpd.begin(), cpd.end(), '*') == cpd.size()) {
     // simple array; set or resize as necessary
-        h = gConvFactories.find(realType + " ptr");
+        h = gConvFactories.find(realTypeStr + " ptr");
         if (h != gConvFactories.end())
             return (h->second)((!dims && 1 < cpd.size()) ? dims_t(cpd.size()) : dims);
 
     }  else if (2 <= cpd.size() && (std::string::size_type)std::count(cpd.begin(), cpd.end(), '[') == cpd.size() / 2) {
     // fixed array, dims will have size if available
-        h = gConvFactories.find(realType + " ptr");
+        h = gConvFactories.find(realTypeStr + " ptr");
         if (h != gConvFactories.end())
             return (h->second)(dims);
     }
 
 //-- special case: initializer list
-    if (realType.compare(0, 21, "std::initializer_list") == 0) {
+    if (realTypeStr.compare(0, 21, "std::initializer_list") == 0) {
     // get the type of the list and create a converter (TODO: get hold of value_type?)
-        auto pos = realType.find('<');
-        std::string value_type = realType.substr(pos+1, realType.size()-pos-2);
+        auto pos = realTypeStr.find('<');
+        std::string value_type = realTypeStr.substr(pos+1, realTypeStr.size()-pos-2);
         Converter* cnv = nullptr; bool use_byte_cnv = false;
         if (cpd == "" && Cppyy::GetScope(value_type)) {
         // initializer list of object values does not work as the target is raw
@@ -3272,7 +3272,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
         } else
             cnv = CreateConverter(value_type);
         if (cnv || use_byte_cnv)
-            return new InitializerListConverter(Cppyy::GetScope(realType),
+            return new InitializerListConverter(Cppyy::GetScope(realTypeStr),
                     CreateConverter(value_type), cnv, Cppyy::SizeOf(value_type));
     }
 
@@ -3280,23 +3280,23 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
     bool control = cpd == "&" || isConst;
 
 //-- special case: std::function
-    auto pos = resolvedType.find("std::function<");
+    auto pos = resolvedTypeStr.find("std::function<");
     if (pos == 0 /* std:: */ || pos == 6 /* const std:: */ ) {
 
     // get actual converter for normal passing
         Converter* cnv = selectInstanceCnv(
-            Cppyy::GetScope(realType), cpd, dims, isConst, control);
+            Cppyy::GetScope(realTypeStr), cpd, dims, isConst, control);
 
         if (cnv) {
         // get the type of the underlying (TODO: use target_type?)
-            auto pos1 = resolvedType.find("(", pos+14);
-            auto pos2 = resolvedType.rfind(")");
+            auto pos1 = resolvedTypeStr.find("(", pos+14);
+            auto pos2 = resolvedTypeStr.rfind(")");
             if (pos1 != std::string::npos && pos2 != std::string::npos) {
                 auto sz1 = pos1-pos-14;
-                if (resolvedType[pos+14+sz1-1] == ' ') sz1 -= 1;
+                if (resolvedTypeStr[pos+14+sz1-1] == ' ') sz1 -= 1;
 
                 return new StdFunctionConverter(cnv,
-                    resolvedType.substr(pos+14, sz1), resolvedType.substr(pos1, pos2-pos1+1));
+                    resolvedTypeStr.substr(pos+14, sz1), resolvedTypeStr.substr(pos1, pos2-pos1+1));
             } else if (cnv->HasState())
                 delete cnv;
         }
@@ -3305,9 +3305,9 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 // converters for known C++ classes and default (void*)
     Converter* result = nullptr;
     Cppyy::TCppScope_t klass = Cppyy::GetScopeFromType(type);
-    if (klass || (klass = Cppyy::GetFullScope(realType))) {
+    if (klass || (klass = Cppyy::GetFullScope(realTypeStr))) {
         Cppyy::TCppType_t raw{0};
-        if (Cppyy::GetSmartPtrInfo(realType, &raw, nullptr)) {
+        if (Cppyy::GetSmartPtrInfo(realTypeStr, &raw, nullptr)) {
             if (cpd == "") {
                 result = new SmartPtrConverter(klass, raw, control);
             } else if (cpd == "&") {
@@ -3319,9 +3319,9 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 
         if (!result) {
         // CLING WORKAROUND -- special case for STL iterators
-            if (realType.rfind("__gnu_cxx::__normal_iterator", 0) /* vector */ == 0
+            if (realTypeStr.rfind("__gnu_cxx::__normal_iterator", 0) /* vector */ == 0
 #ifdef __APPLE__
-                || realType.rfind("__wrap_iter", 0) == 0
+                || realTypeStr.rfind("__wrap_iter", 0) == 0
 #endif
                 // TODO: Windows?
                ) {
@@ -3332,24 +3332,24 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
                 result = selectInstanceCnv(klass, cpd, dims, isConst, control);
             }
         }
-    } else if (resolvedType.find("(*)") != std::string::npos ||
-               (resolvedType.find("::*)") != std::string::npos)) {
+    } else if (resolvedTypeStr.find("(*)") != std::string::npos ||
+               (resolvedTypeStr.find("::*)") != std::string::npos)) {
     // this is a function function pointer
     // TODO: find better way of finding the type
-        auto pos1 = resolvedType.find('(');
-        auto pos2 = resolvedType.find("*)");
-        auto pos3 = resolvedType.rfind(')');
+        auto pos1 = resolvedTypeStr.find('(');
+        auto pos2 = resolvedTypeStr.find("*)");
+        auto pos3 = resolvedTypeStr.rfind(')');
         result = new FunctionPointerConverter(
-            resolvedType.substr(0, pos1), resolvedType.substr(pos2+2, pos3-pos2-1));
+            resolvedTypeStr.substr(0, pos1), resolvedTypeStr.substr(pos2+2, pos3-pos2-1));
     }
 
     if (!result && cpd == "&&") {
     // for builtin, can use const-ref for r-ref
-        h = gConvFactories.find("const " + realType + " &");
+        h = gConvFactories.find("const " + realTypeStr + " &");
         if (h != gConvFactories.end())
             return (h->second)(dims);
-        std::string temp ="const " + realUnresolvedType + " &";
-        h = gConvFactories.find("const " + realUnresolvedType + " &");
+        std::string temp ="const " + realUnresolvedTypeStr + " &";
+        h = gConvFactories.find("const " + realUnresolvedTypeStr + " &");
         if (h != gConvFactories.end())
             return (h->second)(dims);
     // else, unhandled moves
