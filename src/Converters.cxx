@@ -3297,8 +3297,9 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
                 auto sz1 = pos1-pos-14;
                 if (resolvedTypeStr[pos+14+sz1-1] == ' ') sz1 -= 1;
 
+                const std::string &argsStr = resolvedTypeStr.substr(pos1, pos2-pos1+1).c_str();
                 return new StdFunctionConverter(cnv,
-                    resolvedTypeStr.substr(pos+14, sz1), resolvedTypeStr.substr(pos1, pos2-pos1+1));
+                    resolvedTypeStr.substr(pos+14, sz1), argsStr == "(void)"? "()" : argsStr);
             } else if (cnv->HasState())
                 delete cnv;
         }
