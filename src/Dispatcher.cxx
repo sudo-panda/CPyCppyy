@@ -332,8 +332,8 @@ bool CPyCppyy::InsertDispatcher(CPPScope* klass, PyObject* bases, PyObject* dct,
         if (PyDict_Size(clbs)) {
             size_t nbases = Cppyy::GetNumBases(binfo.btype);
             for (size_t ibase = 0; ibase < nbases; ++ibase) {
-                Cppyy::TCppScope_t tbase = (Cppyy::TCppScope_t)Cppyy::GetScope( \
-                    Cppyy::GetBaseName(binfo.btype, ibase));
+                Cppyy::TCppScope_t tbase =
+                    (Cppyy::TCppScope_t) Cppyy::GetBaseScope(binfo.btype, ibase);
 
                 PyObject* keys = PyDict_Keys(clbs);
                 for (Py_ssize_t i = 0; i < PyList_GET_SIZE(keys); ++i) {
