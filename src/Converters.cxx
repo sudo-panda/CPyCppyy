@@ -3581,7 +3581,7 @@ public:
         gf["char*[]"] =                     (cf_t)+[](cdims_t d) { return new NonConstCStringArrayConverter{d}; };
         gf["char ptr"] =                    gf["char*[]"];
         gf["std::string"] =                 (cf_t)+[](cdims_t) { return new STLStringConverter{}; };
-        gf["const std::string&"] =          gf["std::string"];
+        gf["const std::string &"] =         gf["std::string"];
         gf["std::string&&"] =               (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
 #if __cplusplus > 201402L
         gf["std::string_view"] =            (cf_t)+[](cdims_t) { return new STLStringViewConverter{}; };
