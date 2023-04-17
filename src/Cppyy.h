@@ -140,6 +140,9 @@ namespace Cppyy {
     CPPYY_IMPORT
     TCppFuncAddr_t GetFunctionAddress(TCppMethod_t method, bool check_enabled=true);
 
+    CPPYY_IMPORT
+    void AddTypeToLambda(TCppType_t type, const std::string &lambda_name);
+
 // handling of function argument buffer --------------------------------------
     CPPYY_IMPORT
     void*  AllocateFunctionArgs(size_t nargs);

@@ -325,7 +325,9 @@ void CPyCppyy::CPPDataMember::Set(Cppyy::TCppScope_t scope, Cppyy::TCppScope_t d
         fFlags |= kIsArrayType;
 
     fFullType = Cppyy::GetTypeAsString(type);
-    if (Cppyy::IsEnumType(type)) {
+    if (fFullType == "(lambda)") {
+        Cppyy::AddTypeToLambda(Cppyy::ResolveType(type), name);
+    } else if (Cppyy::IsEnumType(type)) {
         if (fFullType.find("(anonymous)") == std::string::npos &&
             fFullType.find("(unnamed)")   == std::string::npos) {
         // repurpose fDescription for lazy lookup of the enum later
