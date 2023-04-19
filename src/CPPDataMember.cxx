@@ -48,11 +48,6 @@ static PyObject* dm_get(CPPDataMember* dm, CPPInstance* pyobj, PyObject* /* kls 
         }
     }
 
-// non-initialized or public data accesses through class (e.g. by help())
-    void* address = dm->GetAddress(pyobj);
-    if (!address || (intptr_t)address == -1 /* Cling error */)
-        return nullptr;
-
     if (dm->fFlags & (kIsEnumPrep | kIsEnumType)) {
         if (dm->fFlags & kIsEnumPrep) {
         // still need to do lookup; only ever try this once, then fallback on converter
@@ -90,6 +85,11 @@ static PyObject* dm_get(CPPDataMember* dm, CPPInstance* pyobj, PyObject* /* kls 
             return dm->fDescription;
         }
     }
+
+// non-initialized or public data accesses through class (e.g. by help())
+    void* address = dm->GetAddress(pyobj);
+    if (!address || (intptr_t)address == -1 /* Cling error */)
+        return nullptr;
 
     if (dm->fConverter != 0) {
         PyObject* result = dm->fConverter->FromMemory((dm->fFlags & kIsArrayType) ? &address : address);
