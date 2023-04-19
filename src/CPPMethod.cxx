@@ -490,7 +490,7 @@ int CPyCppyy::CPPMethod::GetPriority()
             if (scope)
                 priority += (int)Cppyy::GetNumBases(scope);
 
-            if (Cppyy::IsEnum(scope))
+            if (Cppyy::IsEnumScope(scope))
                 priority -= 100;
 
         // a couple of special cases as explained above
