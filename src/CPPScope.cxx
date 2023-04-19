@@ -386,7 +386,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
         // tickle lazy lookup of data members
         if (!attr) {
             Cppyy::TCppScope_t var = Cppyy::GetNamed(name, scope);
-            if (Cppyy::IsVariable(var)) {
+            if (Cppyy::IsVariable(var) || Cppyy::IsEnumConstant(var)) {
                 attr = (PyObject*)CPPDataMember_New(scope, var);
             }
         }
