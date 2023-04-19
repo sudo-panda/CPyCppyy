@@ -608,7 +608,7 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
         return pytemplate;
     }
 
-    if (Cppyy::IsEnum(scope))
+    if (Cppyy::IsEnumScope(scope))
         return nullptr;
 
 // locate class by ID, if possible, to prevent parsing scopes/templates anew

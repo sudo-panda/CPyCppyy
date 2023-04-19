@@ -427,7 +427,7 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
         if (!attr) {
         // TODO: IsEnum should deal with the scope, using klass->GetListOfEnums()->FindObject()
             Cppyy::TCppScope_t enumerator = Cppyy::GetNamed(name, scope);
-            if (Cppyy::IsEnum(enumerator)) {
+            if (Cppyy::IsEnumScope(enumerator)) {
             // enum types (incl. named and class enums)
                 attr = (PyObject*)CPPEnum_New(name, enumerator);
             } else {

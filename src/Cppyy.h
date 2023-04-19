@@ -170,7 +170,7 @@ namespace Cppyy {
     CPPYY_IMPORT
     bool IsAbstract(TCppType_t type);
     CPPYY_IMPORT
-    bool IsEnum(TCppScope_t scope);
+    bool IsEnumScope(TCppScope_t scope);
     CPPYY_IMPORT
     bool IsEnumType(TCppType_t type);
     CPPYY_IMPORT
