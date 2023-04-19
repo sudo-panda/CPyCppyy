@@ -172,6 +172,8 @@ namespace Cppyy {
     CPPYY_IMPORT
     bool IsEnumScope(TCppScope_t scope);
     CPPYY_IMPORT
+    bool IsEnumConstant(TCppScope_t scope);
+    CPPYY_IMPORT
     bool IsEnumType(TCppType_t type);
     CPPYY_IMPORT
     bool IsAggregate(TCppType_t type);
@@ -330,6 +332,8 @@ namespace Cppyy {
     TCppScope_t GetEnumScope(TCppScope_t);
     CPPYY_IMPORT
     std::vector<TCppScope_t> GetEnumConstants(TCppScope_t scope);
+    CPPYY_IMPORT
+    TCppType_t  GetEnumConstantType(TCppScope_t scope);
     CPPYY_IMPORT
     long long   GetEnumDataValue(TCppScope_t scope);
     CPPYY_IMPORT
