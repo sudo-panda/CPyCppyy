@@ -318,25 +318,30 @@ void CPyCppyy::CPPDataMember::Set(Cppyy::TCppScope_t scope, Cppyy::TCppScope_t d
     fFlags          = Cppyy::IsStaticDatamember(data) ? kIsStaticData : 0;
 
     const std::string name = Cppyy::GetFinalName(data);
-    Cppyy::TCppType_t type = Cppyy::GetDatamemberType(data);
+    Cppyy::TCppType_t type;
 
-    std::vector<dim_t> dims = Cppyy::GetDimensions(type);
-    if (!dims.empty())
-        fFlags |= kIsArrayType;
-
-    fFullType = Cppyy::GetTypeAsString(type);
-    if (Cppyy::IsEnumType(type)) {
+    if (Cppyy::IsEnumConstant(data)) {
+        type = Cppyy::GetEnumConstantType(data);
+        fFullType = Cppyy::GetTypeAsString(type);
         if (fFullType.find("(anonymous)") == std::string::npos &&
             fFullType.find("(unnamed)")   == std::string::npos) {
         // repurpose fDescription for lazy lookup of the enum later
             fDescription = CPyCppyy_PyText_FromString((fFullType + "::" + name).c_str());
             fFlags |= kIsEnumPrep;
         }
-        fFullType = Cppyy::ResolveEnum(data);
+        type = Cppyy::ResolveType(type);
         fFlags |= kIsConstData;
-    } else if (Cppyy::IsConstVar(data)) {
-        fFlags |= kIsConstData;
+    } else {
+        type = Cppyy::GetDatamemberType(data);
+        
+        if (Cppyy::IsConstVar(data))
+            fFlags |= kIsConstData;
     }
+
+    std::vector<dim_t> dims = Cppyy::GetDimensions(type);
+
+    if (!dims.empty())
+        fFlags |= kIsArrayType;
 
     if (dims.empty())
         fConverter = CreateConverter(type, 0);
