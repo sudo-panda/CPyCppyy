@@ -3586,11 +3586,15 @@ public:
         gf["std::string"] =                 (cf_t)+[](cdims_t) { return new STLStringConverter{}; };
         gf["const std::string&"] =          gf["std::string"];
         gf["std::string&&"] =               (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
+        gf["const std::string &"] =         gf["std::string"];
+        gf["std::string &&"] =              (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
 #if __cplusplus > 201402L
         gf["std::string_view"] =            (cf_t)+[](cdims_t) { return new STLStringViewConverter{}; };
         gf[STRINGVIEW] =                    gf["std::string_view"];
         gf["std::string_view&"] =           gf["std::string_view"];
         gf["const " STRINGVIEW "&"] =       gf["std::string_view"];
+        gf["std::string_view &"] =          gf["std::string_view"];
+        gf["const " STRINGVIEW " &"] =      gf["std::string_view"];
 #endif
         gf["std::wstring"] =                (cf_t)+[](cdims_t) { return new STLWStringConverter{}; };
         gf[WSTRING1] =                      gf["std::wstring"];
@@ -3598,6 +3602,9 @@ public:
         gf["const std::wstring&"] =         gf["std::wstring"];
         gf["const " WSTRING1 "&"] =         gf["std::wstring"];
         gf["const " WSTRING2 "&"] =         gf["std::wstring"];
+        gf["const std::wstring &"] =        gf["std::wstring"];
+        gf["const " WSTRING1 " &"] =        gf["std::wstring"];
+        gf["const " WSTRING2 " &"] =        gf["std::wstring"];
         gf["void*&"] =                      (cf_t)+[](cdims_t) { static VoidPtrRefConverter c{};     return &c; };
         gf["void**"] =                      (cf_t)+[](cdims_t d) { return new VoidPtrPtrConverter{d}; };
         gf["void ptr"] =                    gf["void**"];
