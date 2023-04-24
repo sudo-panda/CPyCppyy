@@ -1463,6 +1463,7 @@ bool CPyCppyy::VoidArrayConverter::SetArg(
 {
 // just convert pointer if it is a C++ object
     CPPInstance* pyobj = GetCppInstance(pyobject);
+    para.fValue.fVoidp = nullptr;
     if (pyobj) {
     // depending on memory policy, some objects are no longer owned when passed to C++
         if (!fKeepControl && !UseStrictOwnership(ctxt))
