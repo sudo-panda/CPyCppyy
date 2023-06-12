@@ -54,19 +54,16 @@ static PyObject* dm_get(CPPDataMember* dm, CPPInstance* pyobj, PyObject* /* kls 
             dm->fFlags &= ~kIsEnumPrep;
 
         // fDescription contains the full name of the actual enum value object
-            const std::string& lookup = CPyCppyy_PyText_AsString(dm->fDescription);
-            const std::string& enum_type  = TypeManip::extract_namespace(lookup);
-            const std::string& enum_scope = TypeManip::extract_namespace(enum_type);
+            const Cppyy::TCppScope_t enum_type  = Cppyy::GetParentScope(dm->fScope);
+            const Cppyy::TCppScope_t enum_scope = Cppyy::GetParentScope(enum_type);
 
-            PyObject* pyscope = nullptr;
-            if (enum_scope.empty()) pyscope = GetScopeProxy(Cppyy::GetGlobalScope());
-            else pyscope = CreateScopeProxy(enum_scope);
+            PyObject* pyscope = CreateScopeProxy(enum_scope);
             if (pyscope) {
-                PyObject* pyEnumType = PyObject_GetAttrString(pyscope,
-                    enum_type.substr(enum_scope.size() ? enum_scope.size()+2 : 0, std::string::npos).c_str());
+                PyObject* pyEnumType = 
+                    PyObject_GetAttrString(pyscope, Cppyy::GetFinalName(enum_type).c_str());
                 if (pyEnumType) {
-                    PyObject* pyval = PyObject_GetAttrString(pyEnumType,
-                        lookup.substr(enum_type.size()+2, std::string::npos).c_str());
+                    PyObject* pyval =
+                        PyObject_GetAttrString(pyEnumType, Cppyy::GetFinalName(dm->fScope).c_str());
                     Py_DECREF(pyEnumType);
                     if (pyval) {
                         Py_DECREF(dm->fDescription);
