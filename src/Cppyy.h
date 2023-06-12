@@ -74,6 +74,8 @@ namespace Cppyy {
     CPPYY_IMPORT
     TCppScope_t GetScope(const std::string& name, TCppScope_t parent_scope = 0);
     CPPYY_IMPORT
+    TCppScope_t GetUnderlyingScope(TCppScope_t scope);
+    CPPYY_IMPORT
     TCppScope_t GetFullScope(const std::string& scope_name);
     CPPYY_IMPORT
     TCppScope_t GetTypeScope(TCppScope_t klass);
