@@ -647,7 +647,7 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
 
             if (!(((CPPScope*)pyscope)->fFlags & CPPScope::kIsNamespace)) {
             // add python-style features to classes only
-                if (!Pythonize(pyscope, Cppyy::GetScopedFinalName(scope))) {
+                if (!Pythonize(pyscope, scope)) {
                     Py_DECREF(pyscope);
                     pyscope = nullptr;
                 }

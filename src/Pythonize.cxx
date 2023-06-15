@@ -1568,8 +1568,10 @@ bool run_pythonizors(PyObject* pyclass, PyObject* pyname, const std::vector<PyOb
     return pstatus;
 }
 
-bool CPyCppyy::Pythonize(PyObject* pyclass, const std::string& name)
+bool CPyCppyy::Pythonize(PyObject* pyclass, Cppyy::TCppScope_t scope)
 {
+    const std::string& name = Cppyy::GetScopedFinalName(scope);
+    
 // Add pre-defined pythonizations (for STL and ROOT) to classes based on their
 // signature and/or class name.
     if (!pyclass)
