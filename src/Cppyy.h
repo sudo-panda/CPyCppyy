@@ -93,7 +93,9 @@ namespace Cppyy {
     CPPYY_IMPORT
     TCppType_t  GetActualClass(TCppType_t klass, TCppObject_t obj);
     CPPYY_IMPORT
-    size_t      SizeOf(TCppType_t klass);
+    size_t      SizeOf(TCppScope_t klass);
+    CPPYY_IMPORT
+    size_t      SizeOfType(TCppType_t type);
     CPPYY_IMPORT
     size_t      SizeOf(const std::string& type_name);
 
