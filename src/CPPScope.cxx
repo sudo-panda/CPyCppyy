@@ -383,23 +383,15 @@ static PyObject* meta_getattro(PyObject* pyclass, PyObject* pyname)
             }
         }
 
-        // tickle lazy lookup of data members
         if (!attr) {
-            Cppyy::TCppScope_t var = Cppyy::GetNamed(name, scope);
-            if (Cppyy::IsVariable(var) || Cppyy::IsEnumConstant(var)) {
-                attr = (PyObject*)CPPDataMember_New(scope, var);
-            }
-        }
-
-    // this may be a typedef that resolves to a sugared type
-        if (!attr) {
-            const std::string& lookup = Cppyy::GetScopedFinalName(klass->fCppType) + "::" + name;
-            const std::string& resolved = Cppyy::ResolveName(lookup);
-            if (resolved != lookup) {
-                const std::string& cpd = TypeManip::compound(resolved);
+            Cppyy::TCppScope_t lookup_result = Cppyy::GetNamed(name, scope);
+            if (Cppyy::IsVariable(lookup_result) || Cppyy::IsEnumConstant(lookup_result)) {
+                attr = (PyObject*)CPPDataMember_New(scope, lookup_result);
+            } else if (Cppyy::IsTypedefed(lookup_result)) {
+                Cppyy::TCppType_t resolved_type = Cppyy::ResolveType(Cppyy::GetTypeFromScope(lookup_result));
+                const std::string& cpd = TypeManip::compound(Cppyy::GetTypeAsString(resolved_type));
                 if (cpd == "*") {
-                    const std::string& clean = TypeManip::clean_type(resolved, false, true);
-                    Cppyy::TCppType_t tcl = Cppyy::GetScope(clean);
+                    Cppyy::TCppScope_t tcl = Cppyy::GetScopeFromType(Cppyy::ResolveType(resolved_type));
                     if (tcl) {
                         typedefpointertoclassobject* tpc =
                             PyObject_GC_New(typedefpointertoclassobject, &TypedefPointerToClass_Type);
