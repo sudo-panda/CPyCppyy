@@ -172,6 +172,8 @@ namespace Cppyy {
     CPPYY_IMPORT
     bool IsTemplateInstantiation(TCppScope_t handle);
     CPPYY_IMPORT
+    bool IsTypedefed(TCppScope_t handle);
+    CPPYY_IMPORT
     bool IsAbstract(TCppType_t type);
     CPPYY_IMPORT
     bool IsEnumScope(TCppScope_t scope);
