@@ -578,9 +578,8 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
     if (pyclass)
         return pyclass;
 
+    Cppyy::TCppScope_t parent_scope = Cppyy::GetParentScope(scope);
     if (!parent) {
-        Cppyy::TCppScope_t parent_scope = Cppyy::GetParentScope(scope);
-
         if (parent_scope)
             parent = CreateScopeProxy(parent_scope);
         else {
@@ -590,6 +589,36 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
     }
 
     std::string name = Cppyy::GetFinalName(scope);
+
+    if (Cppyy::IsTypedefed(scope)) {
+        Cppyy::TCppScope_t underlying_scope = Cppyy::GetUnderlyingScope(scope);
+        if (underlying_scope) {
+            scope = underlying_scope;
+        } else {
+            Cppyy::TCppType_t resolved_type = Cppyy::ResolveType(Cppyy::GetTypeFromScope(scope));
+            if (gPyTypeMap) {
+                const std::string& resolved = Cppyy::GetTypeAsString(resolved_type);
+                PyObject* tc = PyDict_GetItemString(gPyTypeMap, resolved.c_str()); // borrowed
+                if (tc && PyCallable_Check(tc)) {
+                    const std::string& scName = Cppyy::GetScopedFinalName(parent_scope);
+                    PyObject* nt = PyObject_CallFunction(tc, (char*)"ss", name.c_str(), scName.c_str());
+                    if (nt) {
+                        if (parent) {
+                            AddScopeToParent(parent, name, nt);
+                            Py_DECREF(parent);
+                        }
+                        return nt;
+                    }
+                    PyErr_Clear();
+                }
+            }
+    
+            PyErr_Format(PyExc_TypeError, "\'%s\' is not a known C++ class", Cppyy::GetScopedFinalName(scope).c_str());
+            Py_XDECREF(parent);
+            return nullptr;
+        }
+    }
+
     if (Cppyy::IsTemplate(scope)) {
         // a "naked" templated class is requested: return callable proxy for instantiations
         PyObject* pytcl = PyObject_GetAttr(gThisModule, PyStrings::gTemplate);
