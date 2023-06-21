@@ -924,7 +924,7 @@ CPyCppyy::Executor* CPyCppyy::CreateExecutor(Cppyy::TCppType_t type, cdims_t dim
     const std::string& cpd = TypeManip::compound(resolvedTypeStr);
     Cppyy::TCppType_t realType = Cppyy::GetRealType(resolvedType);
     std::string realTypeStr = Cppyy::GetTypeAsString(realType);
-    const std::string compounded = cpd.empty() ? realTypeStr : realTypeStr + " " + cpd;
+    const std::string compounded = cpd.empty() ? realTypeStr : realTypeStr + cpd;
 
 // accept unqualified type (as python does not know about qualifiers)
     h = gExecFactories.find(compounded);
