@@ -593,7 +593,8 @@ PyObject* CPyCppyy::CreateScopeProxy(Cppyy::TCppScope_t scope, PyObject* parent,
     if (Cppyy::IsTypedefed(scope)) {
         Cppyy::TCppScope_t underlying_scope = Cppyy::GetUnderlyingScope(scope);
         if (underlying_scope) {
-            scope = underlying_scope;
+            if (Cppyy::IsEnumScope(underlying_scope))
+                return nullptr;
         } else {
             Cppyy::TCppType_t resolved_type = Cppyy::ResolveType(Cppyy::GetTypeFromScope(scope));
             if (gPyTypeMap) {
