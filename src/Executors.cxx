@@ -1173,11 +1173,11 @@ public:
         gf["wchar_t*"] =                    (ef_t)+[](cdims_t) { static WCStringExecutor e{};    return &e;};
         gf["char16_t*"] =                   (ef_t)+[](cdims_t) { static CString16Executor e{};   return &e;};
         gf["char32_t*"] =                   (ef_t)+[](cdims_t) { static CString32Executor e{};   return &e;};
-        gf["std::string"] =                 (ef_t)+[](cdims_t) { static STLStringExecutor e{};   return &e; };
-        gf["std::string&"] =                (ef_t)+[](cdims_t) { return new STLStringRefExecutor{}; };
-        gf["std::wstring"] =                (ef_t)+[](cdims_t) { static STLWStringExecutor e{};  return &e; };
-        gf[WSTRING1] =                      gf["std::wstring"];
-        gf[WSTRING2] =                      gf["std::wstring"];
+        gf["std::basic_string<char>"] =     (ef_t)+[](cdims_t) { static STLStringExecutor e{};   return &e; };
+        gf["std::basic_string<char>&"] =    (ef_t)+[](cdims_t) { return new STLStringRefExecutor{}; };
+        gf["std::basic_string<wchar_t>"] =  (ef_t)+[](cdims_t) { static STLWStringExecutor e{};  return &e; };
+        gf[WSTRING1] =                      gf["std::basic_string<wchar_t>"];
+        gf[WSTRING2] =                      gf["std::basic_string<wchar_t>"];
         gf["__init__"] =                    (ef_t)+[](cdims_t) { static ConstructorExecutor e{}; return &e; };
         gf["PyObject*"] =                   (ef_t)+[](cdims_t) { static PyObjectExecutor e{};    return &e; };
         gf["_object*"] =                    gf["PyObject*"];

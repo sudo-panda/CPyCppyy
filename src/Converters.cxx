@@ -3308,7 +3308,7 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 
 // converters for known C++ classes and default (void*)
     Converter* result = nullptr;
-    Cppyy::TCppScope_t klass = Cppyy::GetScopeFromType(type);
+    Cppyy::TCppScope_t klass = Cppyy::GetScopeFromType(realType);
     if (klass || (klass = Cppyy::GetFullScope(realTypeStr))) {
         Cppyy::TCppType_t raw{0};
         if (Cppyy::GetSmartPtrInfo(realTypeStr, &raw, nullptr)) {
@@ -3584,18 +3584,18 @@ public:
         gf["const char*[]"] =               (cf_t)+[](cdims_t d) { return new CStringArrayConverter{d}; };
         gf["char*[]"] =                     (cf_t)+[](cdims_t d) { return new NonConstCStringArrayConverter{d}; };
         gf["char ptr"] =                    gf["char*[]"];
-        gf["std::string"] =                 (cf_t)+[](cdims_t) { return new STLStringConverter{}; };
-        gf["const std::string&"] =          gf["std::string"];
-        gf["std::string&&"] =               (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
-        gf["const std::string &"] =         gf["std::string"];
-        gf["std::string &&"] =              (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
+        gf["std::basic_string<char>"] =                 (cf_t)+[](cdims_t) { return new STLStringConverter{}; };
+        gf["const std::basic_string<char>&"] =          gf["std::basic_string<char>"];
+        gf["std::basic_string<char>&&"] =               (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
+        gf["const std::basic_string<char> &"] =         gf["std::basic_string<char>"];
+        gf["std::basic_string<char> &&"] =              (cf_t)+[](cdims_t) { return new STLStringMoveConverter{}; };
 #if __cplusplus > 201402L
-        gf["std::string_view"] =            (cf_t)+[](cdims_t) { return new STLStringViewConverter{}; };
-        gf[STRINGVIEW] =                    gf["std::string_view"];
-        gf["std::string_view&"] =           gf["std::string_view"];
-        gf["const " STRINGVIEW "&"] =       gf["std::string_view"];
-        gf["std::string_view &"] =          gf["std::string_view"];
-        gf["const " STRINGVIEW " &"] =      gf["std::string_view"];
+        gf["std::basic_string_view<char>"] =            (cf_t)+[](cdims_t) { return new STLStringViewConverter{}; };
+        gf[STRINGVIEW] =                    gf["std::basic_string_view<char>"];
+        gf["std::basic_string_view<char>&"] =           gf["std::basic_string_view<char>"];
+        gf["const " STRINGVIEW "&"] =       gf["std::basic_string_view<char>"];
+        gf["std::basic_string_view<char> &"] =          gf["std::basic_string_view<char>"];
+        gf["const " STRINGVIEW " &"] =      gf["std::basic_string_view<char>"];
 #endif
         gf["std::wstring"] =                (cf_t)+[](cdims_t) { return new STLWStringConverter{}; };
         gf[WSTRING1] =                      gf["std::wstring"];
