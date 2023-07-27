@@ -3204,8 +3204,8 @@ CPyCppyy::Converter* CPyCppyy::CreateConverter(Cppyy::TCppType_t type, cdims_t d
 //-- nothing? ok, collect information about the type and possible qualifiers/decorators
     bool isConst = strncmp(resolvedTypeStr.c_str(), "const", 5) == 0;
     const std::string& cpd = TypeManip::compound(resolvedTypeStr);
-    Cppyy::TCppType_t realType = Cppyy::GetRealType(type);
-    std::string realTypeStr   = TypeManip::clean_type(resolvedTypeStr, false, true);
+    Cppyy::TCppType_t realType = Cppyy::ResolveType(Cppyy::GetRealType(type));
+    std::string realTypeStr   = Cppyy::GetTypeAsString(realType);
     std::string realUnresolvedTypeStr   = TypeManip::clean_type(fullType, false, true);
 
 // accept unqualified type (as python does not know about qualifiers)
